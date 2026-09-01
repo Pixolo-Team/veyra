@@ -1,0 +1,163 @@
+{
+  "artboards": [
+    {
+      "file": "Signin.dc.html",
+      "title": "1 · Sign in (one-time password)",
+      "x": 0,
+      "y": 0,
+      "w": 1000,
+      "h": 620
+    },
+    {
+      "file": "ResetPassword.dc.html",
+      "title": "2 · Choose your password",
+      "x": 1090,
+      "y": 0,
+      "w": 1000,
+      "h": 620
+    },
+    {
+      "file": "CreateRoom1.dc.html",
+      "title": "3 · Create a data room · info",
+      "x": 2180,
+      "y": 0,
+      "w": 1000,
+      "h": 700
+    },
+    {
+      "file": "CreateRoom2.dc.html",
+      "title": "4 · Create a data room · invite (skippable)",
+      "x": 3270,
+      "y": 0,
+      "w": 1000,
+      "h": 700
+    },
+    {
+      "file": "Main.dc.html",
+      "title": "Overview — the dashboard",
+      "x": 0,
+      "y": 830,
+      "w": 1280,
+      "h": 900
+    },
+    {
+      "file": "EmptyModule.dc.html",
+      "title": "Dossier — empty module",
+      "x": 1370,
+      "y": 830,
+      "w": 1280,
+      "h": 840
+    },
+    {
+      "file": "Upload.dc.html",
+      "title": "Folder upload drawer",
+      "x": 2740,
+      "y": 830,
+      "w": 1280,
+      "h": 840
+    },
+    {
+      "file": "Dossier.dc.html",
+      "title": "Dossier — all modules, add anywhere",
+      "x": 0,
+      "y": 1860,
+      "w": 1280,
+      "h": 840
+    },
+    {
+      "file": "Viewer.dc.html",
+      "title": "Document viewer + tree",
+      "x": 1370,
+      "y": 1860,
+      "w": 1280,
+      "h": 840
+    },
+    {
+      "file": "People.dc.html",
+      "title": "Groups — people & access",
+      "x": 2740,
+      "y": 1860,
+      "w": 1280,
+      "h": 840
+    },
+    {
+      "file": "Activity.dc.html",
+      "title": "Activity log",
+      "x": 0,
+      "y": 2830,
+      "w": 1280,
+      "h": 840
+    },
+    {
+      "file": "GuestAccept.dc.html",
+      "title": "Guest acceptance + NDA",
+      "x": 1370,
+      "y": 2830,
+      "w": 1000,
+      "h": 760
+    },
+    {
+      "file": "InviteModal.dc.html",
+      "title": "Invite — company known",
+      "x": 2460,
+      "y": 2830,
+      "w": 1000,
+      "h": 780
+    },
+    {
+      "file": "InviteUnknown.dc.html",
+      "title": "Invite — company unknown",
+      "x": 3550,
+      "y": 2830,
+      "w": 1000,
+      "h": 780
+    }
+  ],
+  "annotations": [
+    {
+      "id": "wf-fidelity",
+      "x": -380,
+      "y": -250,
+      "w": 320,
+      "text": "Wireframes — structure only.\nGreyscale on purpose: the three highlight colours are the only colour in the set, because there they carry meaning."
+    },
+    {
+      "id": "flow-arrive",
+      "x": -380,
+      "y": 0,
+      "w": 320,
+      "text": "1 · ARRIVING\n\nVeyra provisions the tenant, so the admin never fills in company details.\n\nOne-time password → forced reset → straight into creating the room. Step 4 is skippable."
+    },
+    {
+      "id": "flow-overview",
+      "x": -380,
+      "y": 830,
+      "w": 320,
+      "text": "2 · THE ROOM\n\nOverview answers \"what needs me next?\" — a work queue, not a scoreboard.\n\nNo totals-of-everything tiles: nobody acts on \"512 files\"."
+    },
+    {
+      "id": "flow-work",
+      "x": -380,
+      "y": 1860,
+      "w": 320,
+      "text": "3 · WORKING\n\nDossier is one expandable tree: all five modules, folders, sub-folders, files.\n\nContent can be added at ANY node — new folder, files, or a folder with its nesting intact.\n\nThe viewer drops the app rail on purpose — reading is a focused mode."
+    },
+    {
+      "id": "flow-people",
+      "x": -380,
+      "y": 2830,
+      "w": 320,
+      "text": "4 · PEOPLE & OVERSIGHT\n\nGroups shows access by company, which is also how side is derived.\n\nInvite asks for the company; the side follows from it."
+    },
+    {
+      "id": "note-nav",
+      "x": -380,
+      "y": 3300,
+      "w": 320,
+      "text": "SIDEBAR\n\nWorkspace switches rooms — one person can sit in several.\n\nQ&A is in the rail but not yet designed; it's the first thing after MVP."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

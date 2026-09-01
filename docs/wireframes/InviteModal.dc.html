@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: #26261f; }
+    a { color: #26261f; } a:hover { color: #000000; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1000px; height: 780px; background: #c9c9c5; display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px;">
+
+  <div style="width: 560px; background: #ffffff; border: 1px solid #b4b4ae; display: flex; flex-direction: column;">
+
+    <div style="padding: 19px 24px 15px; border-bottom: 1px solid #d6d6d2; display: flex; align-items: baseline; gap: 10px;">
+      <div style="font-size: 17px; font-weight: 600;">Invite someone</div>
+      <div style="margin-left: auto; font-size: 15px; color: #9a9a93;">×</div>
+    </div>
+
+    <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 20px;">
+
+      <!-- 1 · email -->
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Email</div>
+        <div style="border: 1px solid #b4b4ae; padding: 10px 13px; font-size: 14px;">s.chen@astrivax.com</div>
+      </div>
+
+      <!-- 2 · company, resolved -->
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Company</div>
+
+        <div style="border: 1px solid #26261f; padding: 12px 13px; display: flex; align-items: center; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 14px; font-weight: 500;">Astrivax Therapeutics</div>
+            <div class="mono" style="font-size: 11px; color: #6d6d66;">astrivax.com</div>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+            <div class="mono" style="font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #26261f; border: 1px solid #26261f; padding: 2px 8px;">matched by domain</div>
+            <div style="font-size: 12px; color: #6d6d66; text-decoration: underline;">Change</div>
+          </div>
+        </div>
+
+        <!-- the consequence, stated not asked -->
+        <div style="background: #f2f2f0; border-left: 2px solid #b4b4ae; padding: 9px 12px; font-size: 12.5px; line-height: 1.5; color: #26261f;">
+          They'll join on <strong>Astrivax's</strong> side — the company reviewing the dossier.
+        </div>
+      </div>
+
+      <!-- 3 · access ladder, scoped to that company -->
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Access</div>
+          <div class="mono" style="font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #9a9a93;">each level adds to the one above</div>
+        </div>
+
+        <div style="border: 1px solid #b4b4ae; display: flex; flex-direction: column;">
+
+          <div style="padding: 12px 13px; border-bottom: 1px solid #ececea; display: flex; gap: 11px; align-items: flex-start; background: #f2f2f0; border-left: 2px solid #26261f; margin-left: -1px;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 4px solid #26261f; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Review</div>
+              <div style="font-size: 12px; color: #6d6d66; line-height: 1.45;">Open documents, highlight and comment. Watermarked, in the browser.</div>
+            </div>
+          </div>
+
+          <div style="padding: 12px 13px; border-bottom: 1px solid #ececea; display: flex; gap: 11px; align-items: flex-start; background: #f7f7f5;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid #d6d6d2; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="display: flex; align-items: center; gap: 9px;">
+                <div style="font-size: 13.5px; font-weight: 500; color: #9a9a93;">Review + Download</div>
+                <div class="mono" style="font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: #9a9a93; border: 1px solid #d6d6d2; padding: 1px 6px;">unavailable</div>
+              </div>
+              
+              <div style="font-size: 11.5px; color: #6d6d66; line-height: 1.45;">Downloads are off for this room — <span style="text-decoration: underline;">turn them on in room settings</span> to offer this.</div>
+            </div>
+          </div>
+
+          <div style="padding: 12px 13px; display: flex; gap: 11px; align-items: flex-start;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid #b4b4ae; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Admin</div>
+              <div style="font-size: 12px; color: #6d6d66; line-height: 1.45;"><strong>+</strong> manage files and people on Astrivax's side</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 4 · discipline, a label only -->
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Discipline</div>
+          <div class="mono" style="font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #9a9a93; border: 1px solid #d6d6d2; padding: 1px 7px;">optional label</div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <div style="font-size: 12.5px; padding: 5px 12px; border: 1px solid #26261f;">Regulatory</div>
+          <div style="font-size: 12.5px; padding: 5px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">CMC</div>
+          <div style="font-size: 12.5px; padding: 5px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Clinical</div>
+          <div style="font-size: 12.5px; padding: 5px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Quality</div>
+          <div style="font-size: 12.5px; padding: 5px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Legal</div>
+        </div>
+        <div style="font-size: 12px; color: #9a9a93; line-height: 1.5;">For filtering only. It grants nothing.</div>
+      </div>
+
+    </div>
+
+    <div style="padding: 15px 24px; border-top: 1px solid #d6d6d2; display: flex; align-items: center; gap: 12px;">
+      <div style="font-size: 12px; color: #9a9a93; line-height: 1.4;">They'll accept the NDA<br>before seeing anything.</div>
+      <div style="margin-left: auto; font-size: 13.5px; padding: 9px 18px; border: 1px solid #b4b4ae; color: #6d6d66;">Cancel</div>
+      <div style="font-size: 13.5px; font-weight: 500; padding: 9px 20px; background: #26261f; color: #ffffff;">Send invite</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

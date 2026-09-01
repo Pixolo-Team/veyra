@@ -1,0 +1,41 @@
+/**
+ * Global baseline only.
+ *
+ * Everything visual comes from the design system via ConfigProvider. The
+ * `--ant-*` custom properties referenced here are emitted by antd's cssVar
+ * mode (see `createTheme`), so this file follows the theme without knowing
+ * which mode is active.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ant-color-bg-layout);
+  color: var(--ant-color-text);
+  font-family: var(--ant-font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Respect the user's motion preference over any animation we ship. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: #26261f; }
+    a { color: #26261f; } a:hover { color: #000000; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1000px; height: 760px; background: #ececea; display: flex; flex-direction: column;">
+
+  <div style="height: 52px; border-bottom: 1px solid #d6d6d2; background: #ffffff; display: flex; align-items: center; padding: 0 22px;">
+    <div style="width: 66px; height: 13px; background: #26261f;"></div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; justify-content: center; padding: 30px 20px;">
+    <div style="width: 600px; display: flex; flex-direction: column; gap: 16px;">
+
+      <!-- stepper -->
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 18px; height: 18px; border-radius: 50%; background: #26261f; color: #ffffff; font-size: 10px; display: flex; align-items: center; justify-content: center;">&#10003;</div>
+          <div style="font-size: 12.5px; color: #6d6d66;">Password set</div>
+        </div>
+        <div style="flex-grow: 1; height: 1px; background: #d6d6d2;"></div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #26261f;"></div>
+          <div style="font-size: 12.5px; font-weight: 500;">Non-disclosure agreement</div>
+        </div>
+      </div>
+
+      <div style="background: #ffffff; border: 1px solid #d6d6d2; padding: 28px 30px; display: flex; flex-direction: column; gap: 20px;">
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 22px; font-weight: 600; letter-spacing: -.02em;">Before you see anything</div>
+          <div style="font-size: 13.5px; color: #6d6d66; line-height: 1.55;">
+            <strong>Corvellis Biopharma</strong> has invited you to review the Project&nbsp;Alpha dossier.
+            They ask everyone to accept this agreement first.
+          </div>
+        </div>
+
+        <!-- NDA body -->
+        <div style="border: 1px solid #d6d6d2; background: #f7f7f5; height: 268px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; position: relative;">
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <div style="font-size: 13px; font-weight: 600;">Mutual Non-Disclosure Agreement</div>
+            <div class="mono" style="margin-left: auto; font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: #6d6d66; border: 1px solid #b4b4ae; padding: 1px 7px;">v2.1</div>
+          </div>
+
+          <div style="font-size: 11.5px; line-height: 1.75; color: #26261f;">
+            The Recipient agrees that all information disclosed through this data room, including
+            regulatory, clinical and manufacturing documentation, is confidential and is provided
+            solely for the purpose of evaluating a potential transaction. The Recipient acknowledges
+            that access to each document, including the identity of the reader and the time spent,
+            is logged and is visible to the Disclosing Party.
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div style="height: 6px; background: #e4e4e0; width: 100%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 97%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 92%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 99%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 84%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 96%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 71%;"></div>
+          </div>
+
+          <!-- scroll affordance -->
+          <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 42px; background: #f7f7f5; opacity: .85;"></div>
+          <div class="mono" style="position: absolute; right: 18px; bottom: 12px; font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: #9a9a93;">scroll to read in full</div>
+        </div>
+
+        <!-- accept -->
+        <div style="display: flex; gap: 11px; align-items: flex-start;">
+          <div style="width: 15px; height: 15px; border: 1px solid #26261f; margin-top: 2px; flex: none;"></div>
+          <div style="font-size: 13px; line-height: 1.5;">I have read and agree to the terms of this agreement on behalf of <strong>Astrivax Therapeutics</strong>.</div>
+        </div>
+
+        <div style="background: #f2f2f0; border-left: 2px solid #b4b4ae; padding: 12px 13px; font-size: 12px; line-height: 1.55; color: #6d6d66; display: flex; flex-direction: column; gap: 7px;">
+          <div>Your acceptance is recorded with a timestamp and the version of this text &mdash; and it appears in the room&#39;s activity log.</div>
+          <div><strong style="color: #26261f;">Your activity in this room is recorded.</strong> Corvellis can see which documents you open, when, and how long you spend in them. Your own administrators at Astrivax can see the same.</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; border-top: 1px solid #ececea; padding-top: 16px;">
+          <div style="font-size: 12.5px; color: #6d6d66;">Decline</div>
+          <div style="margin-left: auto; font-size: 14px; font-weight: 500; padding: 10px 24px; background: #26261f; color: #ffffff;">Accept and open the room</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

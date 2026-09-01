@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: #26261f; }
+    a { color: #26261f; } a:hover { color: #000000; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1000px; height: 700px; background: #ececea; display: flex; flex-direction: column;">
+
+  <div style="height: 52px; border-bottom: 1px solid #d6d6d2; background: #ffffff; display: flex; align-items: center; padding: 0 22px; gap: 12px;">
+    <div style="width: 66px; height: 13px; background: #26261f;"></div>
+    <div class="mono" style="margin-left: auto; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #9a9a93;">Step 2 of 2</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; height: 3px;">
+    <div style="background: #26261f;"></div>
+    <div style="background: #26261f;"></div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; justify-content: center; padding: 30px 20px;">
+    <div style="width: 640px; background: #ffffff; border: 1px solid #d6d6d2; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px;">
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 22px; font-weight: 600; letter-spacing: -.02em;">Who else needs access?</div>
+        
+      </div>
+
+      <!-- add rows -->
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Invite by email</div>
+
+        <div style="display: grid; grid-template-columns: minmax(0,1fr) 168px 150px 24px; gap: 9px; align-items: center;">
+          <div style="border: 1px solid #b4b4ae; padding: 9px 12px; font-size: 13.5px;">t.belasco@corvellis.com</div>
+          <div style="border: 1px solid #d6d6d2; background: #f7f7f5; padding: 9px 12px; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">
+            <span style="color: #6d6d66;">Corvellis</span>
+            <span class="mono" style="margin-left: auto; font-size: 8.5px; letter-spacing: .07em; text-transform: uppercase; color: #9a9a93;">matched</span>
+          </div>
+          <div style="border: 1px solid #b4b4ae; padding: 9px 12px; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">Admin <span style="margin-left: auto; color: #b4b4ae; font-size: 10px;">▾</span></div>
+          <div style="font-size: 14px; color: #9a9a93; justify-self: center;">×</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0,1fr) 168px 150px 24px; gap: 9px; align-items: center;">
+          <div style="border: 1px solid #b4b4ae; padding: 9px 12px; font-size: 13.5px;">s.chen@astrivax.com</div>
+          <div style="border: 1px solid #d6d6d2; background: #f7f7f5; padding: 9px 12px; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">
+            <span style="color: #6d6d66;">Astrivax</span>
+            <span class="mono" style="margin-left: auto; font-size: 8.5px; letter-spacing: .07em; text-transform: uppercase; color: #9a9a93;">matched</span>
+          </div>
+          <div style="border: 1px solid #b4b4ae; padding: 9px 12px; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">Review <span style="margin-left: auto; color: #b4b4ae; font-size: 10px;">▾</span></div>
+          <div style="font-size: 14px; color: #9a9a93; justify-self: center;">×</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0,1fr) 168px 150px 24px; gap: 9px; align-items: center;">
+          <div style="border: 1px dashed #b4b4ae; padding: 9px 12px; font-size: 13.5px; color: #9a9a93;">Add another email…</div>
+          <div></div><div></div><div></div>
+        </div>
+
+        <div style="font-size: 12px; color: #9a9a93; line-height: 1.5;">
+          The company comes from the email domain, and the side follows from the company. Anyone we can't place is asked about individually.
+        </div>
+      </div>
+
+      <!-- what happens next -->
+      <div style="background: #f2f2f0; border-left: 2px solid #b4b4ae; padding: 12px 14px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="font-size: 12.5px; font-weight: 600;">What they'll get</div>
+        <div style="font-size: 12px; color: #6d6d66; line-height: 1.55;">
+          An email inviting them to Project Alpha. They set a password, accept the NDA, and land on an empty room until you upload — so it's worth loading Module&nbsp;3 first if the dossier isn't ready.
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 14px; border-top: 1px solid #ececea; padding-top: 16px;">
+        <div style="font-size: 13.5px; color: #26261f; text-decoration: underline;">Invite Later</div>
+        <div style="margin-left: auto; font-size: 14px; font-weight: 500; padding: 10px 24px; background: #26261f; color: #ffffff;">Send 2 invitations</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

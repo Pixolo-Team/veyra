@@ -1,0 +1,7 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/design-system" },
+    { "path": "./apps/playground" }
+  ]
+}

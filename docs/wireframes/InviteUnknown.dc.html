@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: #26261f; }
+    a { color: #26261f; } a:hover { color: #000000; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1000px; height: 780px; background: #c9c9c5; display: flex; align-items: flex-start; justify-content: center; padding: 34px 20px;">
+
+  <div style="width: 560px; background: #ffffff; border: 1px solid #b4b4ae; display: flex; flex-direction: column;">
+
+    <div style="padding: 19px 24px 15px; border-bottom: 1px solid #d6d6d2; display: flex; align-items: baseline; gap: 10px;">
+      <div style="font-size: 17px; font-weight: 600;">Invite someone</div>
+      <div class="mono" style="font-size: 9.5px; letter-spacing: .09em; text-transform: uppercase; color: #9a9a93;">unknown domain</div>
+      <div style="margin-left: auto; font-size: 15px; color: #9a9a93;">&#215;</div>
+    </div>
+
+    <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 19px;">
+
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Email</div>
+        <div style="border: 1px solid #b4b4ae; padding: 10px 13px; font-size: 14px;">m.hart@brightlaw.co.uk</div>
+      </div>
+
+      <!-- company: no domain match, so match-and-confirm -->
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Company</div>
+        <div style="border: 1px solid #26261f; padding: 10px 13px; font-size: 14px; color: #9a9a93;">Brightlaw</div>
+
+        <div style="border: 1px solid #b4b4ae; border-top: 0; display: flex; flex-direction: column;">
+          <div class="mono" style="padding: 8px 13px; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: #9a9a93; background: #f7f7f5; border-bottom: 1px solid #ececea;">Did you mean</div>
+          <div style="padding: 10px 13px; border-bottom: 1px solid #ececea; display: flex; align-items: center; background: #f2f2f0;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Brightline Legal LLP</div>
+              <div class="mono" style="font-size: 11px; color: #6d6d66;">brightlaw.co.uk</div>
+            </div>
+          </div>
+          <div style="padding: 10px 13px; display: flex; align-items: center;">
+            <div style="font-size: 13.5px; color: #6d6d66;">Create new company &ldquo;Brightlaw&rdquo;</div>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: #9a9a93; line-height: 1.5;">Pick a match or create one deliberately &mdash; free text isn&#39;t accepted.</div>
+      </div>
+
+      <!-- the ONE question that can't be derived -->
+      <div style="display: flex; flex-direction: column; gap: 8px; border: 1px solid #26261f; padding: 15px 15px 16px;">
+        <div style="display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 14px; font-weight: 600;">Who are they here with?</div>
+          <div style="font-size: 12.5px; color: #6d6d66; line-height: 1.45;">Brightline Legal isn&#39;t a party to this deal, so we can&#39;t work this out from their email.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 7px; margin-top: 3px;">
+          <div style="border: 1px solid #b4b4ae; padding: 11px 13px; display: flex; gap: 11px; align-items: flex-start;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid #b4b4ae; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Corvellis Biopharma</div>
+              <div style="font-size: 12px; color: #6d6d66; line-height: 1.45;">The company sharing the dossier &mdash; your side.</div>
+            </div>
+          </div>
+
+          <div style="border: 1px solid #26261f; padding: 11px 13px; display: flex; gap: 11px; align-items: flex-start;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 4px solid #26261f; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Astrivax Therapeutics</div>
+              <div style="font-size: 12px; color: #6d6d66; line-height: 1.45;">The company reviewing it.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- access ladder, scoped by the answer above -->
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Access</div>
+          <div class="mono" style="font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #9a9a93;">each level adds to the one above</div>
+        </div>
+
+        <div style="border: 1px solid #b4b4ae; display: flex; flex-direction: column;">
+
+          <div style="padding: 12px 13px; border-bottom: 1px solid #ececea; display: flex; gap: 11px; align-items: flex-start; background: #f2f2f0; border-left: 2px solid #26261f; margin-left: -1px;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 4px solid #26261f; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Review</div>
+              <div style="font-size: 12px; color: #6d6d66; line-height: 1.45;">Open documents, highlight and comment. Watermarked, in the browser.</div>
+            </div>
+          </div>
+
+          <div style="padding: 12px 13px; border-bottom: 1px solid #ececea; display: flex; gap: 11px; align-items: flex-start;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid #b4b4ae; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Review + Download</div>
+              <div style="font-size: 12px; color: #6d6d66; line-height: 1.45;"><strong>+</strong> save the watermarked copy of a file</div>
+            </div>
+          </div>
+
+          <div style="padding: 12px 13px; display: flex; gap: 11px; align-items: flex-start;">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid #b4b4ae; margin-top: 2px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13.5px; font-weight: 500;">Admin</div>
+              <div style="font-size: 12px; color: #6d6d66; line-height: 1.45;"><strong>+</strong> manage files and people on Astrivax&#39;s side</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div style="padding: 15px 24px; border-top: 1px solid #d6d6d2; display: flex; align-items: center; gap: 12px;">
+      <div style="font-size: 12px; color: #9a9a93; line-height: 1.4;">They&#39;ll accept the NDA<br>before seeing anything.</div>
+      <div style="margin-left: auto; font-size: 13.5px; padding: 9px 18px; border: 1px solid #b4b4ae; color: #6d6d66;">Cancel</div>
+      <div style="font-size: 13.5px; font-weight: 500; padding: 9px 20px; background: #26261f; color: #ffffff;">Send invite</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

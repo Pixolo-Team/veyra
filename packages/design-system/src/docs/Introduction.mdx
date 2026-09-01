@@ -1,0 +1,104 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Introduction" />
+
+# Veyra Design System
+
+A token layer over [Ant Design](https://ant.design) v6. Ant Design supplies the
+components; this package supplies the decisions — colour roles, type scale,
+spacing grid, elevation, motion — and translates them into an antd `ThemeConfig`.
+
+## The one rule
+
+Tokens flow in one direction:
+
+```
+palette.ts  →  semantic.ts  →  createTheme.ts  →  antd components
+(raw ramps)    (roles)         (ThemeConfig)
+```
+
+Reach past a layer and the theme stops being swappable. In practice:
+
+- **Never** import from `tokens/palette` outside `tokens/semantic.ts`. Hex values
+  belong in exactly one file.
+- Prefer a **role** (`colors.textSecondary`) over a ramp step (`neutral[7]`). The
+  role survives a rebrand; the ramp index does not.
+- If a component needs a colour that has no role yet, add the role — don't inline
+  the hex.
+
+## Layout of the package
+
+<table>
+  <thead>
+    <tr><th>Path</th><th>Holds</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>tokens/palette.ts</code></td><td>Raw 10-step colour ramps. The only file with literal hex.</td></tr>
+    <tr><td><code>tokens/primitives.ts</code></td><td>Type scale, spacing, radius, elevation, motion, z-index.</td></tr>
+    <tr><td><code>tokens/semantic.ts</code></td><td>Colour <strong>roles</strong>, defined once per mode.</td></tr>
+    <tr><td><code>theme/createTheme.ts</code></td><td>Maps tokens onto antd's <code>ThemeConfig</code>.</td></tr>
+    <tr><td><code>theme/ThemeProvider.tsx</code></td><td>The provider an app mounts. Owns mode + persistence.</td></tr>
+    <tr><td><code>theme/useTokens.ts</code></td><td><code>useAntdToken()</code> and <code>useVeyraTokens()</code>.</td></tr>
+    <tr><td><code>components/</code></td><td>Thin wrappers that add semantics antd doesn't have.</td></tr>
+  </tbody>
+</table>
+
+## Getting started
+
+```tsx
+import { ThemeProvider } from '@veyra/design-system';
+
+createRoot(el).render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>,
+);
+```
+
+`ThemeProvider` defaults to `system`, tracks the OS preference live, persists the
+user's choice to `localStorage`, and mounts antd's `<App>` so `message`,
+`notification` and `modal` inherit the theme too.
+
+## Reading tokens in a component
+
+```tsx
+const { colors, space, shadows } = useVeyraTokens(); // our semantic layer
+const token = useAntdToken();                        // antd's resolved aliases
+```
+
+Use `useAntdToken()` when styling *around* an antd component — it returns every
+alias antd is actually using, after its light/dark algorithm has run. Use
+`useVeyraTokens()` when the role name is what matters.
+
+## Why the wrappers exist
+
+Each wrapper earns its place by adding a distinction antd leaves open:
+
+- **`Button`** — antd v6 can express one look through `type`, `color`, `variant`,
+  `danger` or `ghost`. `intent` names the *job* so an intent maps to exactly one
+  appearance.
+- **`Card`** — adds `elevation` from the shadow scale, resolved per mode. A shadow
+  tuned for white is invisible on near-black.
+- **`Stack`** — accepts only spacing-token names for `gap`. Arbitrary pixel gaps
+  are how a 4px grid quietly erodes.
+- **`ThemeToggle`** — three states, not two. A binary toggle can't say "follow
+  the OS", so either choice would silently end system sync.
+
+Anything antd already does well is re-exported unchanged — import it from `antd`
+directly.
+
+## Accessibility
+
+Contrast is treated as a property of the tokens rather than something checked
+afterwards. **Foundations → Contrast** measures every pairing the system relies
+on, live, against antd's *resolved* tokens — the light/dark algorithm shifts the
+seeds, so auditing the input would report numbers nobody ever sees.
+
+`npm run a11y` sweeps axe-core over every story in both themes and exits
+non-zero on any violation.
+
+## Changing the brand
+
+Edit the `veyra` ramp in `tokens/palette.ts`. Every seed token, alias, component
+override and both modes follow from it. Re-run `npm run a11y` afterwards — the
+ramps are tuned to specific contrast thresholds.

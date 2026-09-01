@@ -1,0 +1,23 @@
+{
+  "name": "veyra",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @veyra/playground",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "tsc -b --force",
+    "lint": "oxlint",
+    "storybook": "npm run storybook --workspace @veyra/design-system",
+    "build-storybook": "npm run build-storybook --workspace @veyra/design-system",
+    "a11y": "npm run a11y --workspace @veyra/design-system"
+  },
+  "devDependencies": {
+    "oxlint": "^1.75.0",
+    "typescript": "~6.0.2"
+  }
+}

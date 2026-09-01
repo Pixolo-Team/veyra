@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: #26261f; }
+    a { color: #26261f; } a:hover { color: #000000; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1000px; height: 700px; background: #ececea; display: flex; flex-direction: column;">
+
+  <div style="height: 52px; border-bottom: 1px solid #d6d6d2; background: #ffffff; display: flex; align-items: center; padding: 0 22px; gap: 12px;">
+    <div style="width: 66px; height: 13px; background: #26261f;"></div>
+    <div class="mono" style="margin-left: auto; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #9a9a93;">Step 1 of 2</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; height: 3px;">
+    <div style="background: #26261f;"></div>
+    <div style="background: #d6d6d2;"></div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; justify-content: center; padding: 30px 20px;">
+    <div style="width: 860px; background: #ffffff; border: 1px solid #d6d6d2; padding: 28px 30px; display: flex; flex-direction: column; gap: 22px;">
+
+      <div style="font-size: 23px; font-weight: 600; letter-spacing: -.02em;">Create a data room</div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px;">
+
+        <!-- LEFT: the two questions -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div style="display: flex; align-items: center; gap: 9px;">
+              <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Workspace name</div>
+              <div class="mono" style="font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #26261f;">required</div>
+            </div>
+            <div style="border: 1px solid #b4b4ae; background: #f7f7f5; padding: 11px 13px; font-size: 15px;">Project Alpha</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">What kind of deal?</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #26261f; background: #26261f; color: #ffffff;">Out-licensing</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">In-licensing</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Asset acquisition</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Divestiture</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Tech transfer</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Due diligence</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Co-development</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Partnership</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div class="mono" style="font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">Anything outside the dossier?</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Intellectual property</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Commercial</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Legal</div>
+              <div style="font-size: 12.5px; padding: 6px 12px; border: 1px solid #b4b4ae; color: #6d6d66;">Financial</div>
+            </div>
+            
+          </div>
+
+        </div>
+
+        <!-- RIGHT: live preview -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+
+          <div style="border: 1px solid #d6d6d2; background: #f7f7f5; padding: 14px 15px; display: flex; flex-direction: column; gap: 11px;">
+            <div class="mono" style="font-size: 10px; letter-spacing: .11em; text-transform: uppercase; color: #9a9a93;">Your data room</div>
+            <div style="display: flex; flex-direction: column; border: 1px solid #d6d6d2; background: #ffffff;">
+              <div style="display: grid; grid-template-columns: 74px minmax(0,1fr) auto; gap: 10px; padding: 7px 11px; border-bottom: 1px solid #ececea; font-size: 12.5px; align-items: baseline;">
+                <span class="mono" style="font-size: 11px; color: #6d6d66;">Module 1</span><span>Administrative</span><span class="mono" style="font-size: 10.5px; color: #9a9a93;">empty</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 74px minmax(0,1fr) auto; gap: 10px; padding: 7px 11px; border-bottom: 1px solid #ececea; font-size: 12.5px; align-items: baseline;">
+                <span class="mono" style="font-size: 11px; color: #6d6d66;">Module 2</span><span>CTD Summaries</span><span class="mono" style="font-size: 10.5px; color: #9a9a93;">empty</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 74px minmax(0,1fr) auto; gap: 10px; padding: 7px 11px; border-bottom: 1px solid #ececea; font-size: 12.5px; align-items: baseline;">
+                <span class="mono" style="font-size: 11px; color: #6d6d66;">Module 3</span><span>Quality</span><span class="mono" style="font-size: 10.5px; color: #9a9a93;">empty</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 74px minmax(0,1fr) auto; gap: 10px; padding: 7px 11px; border-bottom: 1px solid #ececea; font-size: 12.5px; align-items: baseline;">
+                <span class="mono" style="font-size: 11px; color: #6d6d66;">Module 4</span><span>Nonclinical</span><span class="mono" style="font-size: 10.5px; color: #9a9a93;">empty</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 74px minmax(0,1fr) auto; gap: 10px; padding: 7px 11px; font-size: 12.5px; align-items: baseline;">
+                <span class="mono" style="font-size: 11px; color: #6d6d66;">Module 5</span><span>Clinical</span><span class="mono" style="font-size: 10.5px; color: #9a9a93;">empty</span>
+              </div>
+            </div>
+            
+          </div>
+
+          <div style="border: 1px solid #d6d6d2; background: #f7f7f5; padding: 14px 15px; display: flex; flex-direction: column; gap: 9px;">
+            <div class="mono" style="font-size: 10px; letter-spacing: .11em; text-transform: uppercase; color: #9a9a93;">Security</div>
+            <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 1.45;">
+              <div style="display: flex; gap: 8px;"><span>✓</span><span>Watermarking on — every page carries the viewer's name and email</span></div>
+              <div style="display: flex; gap: 8px;"><span>✓</span><span>NDA required before anyone sees a document</span></div>
+              <div style="display: flex; gap: 8px;"><span>✓</span><span>Downloads off — reviewers read in the browser</span></div>
+              <div style="display: flex; gap: 8px; align-items: baseline;">
+                <span>✓</span><span>Audit log on</span>
+                
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; border-top: 1px solid #d6d6d2; padding-top: 16px; gap: 14px;">
+        
+        <div style="margin-left: auto; font-size: 14px; font-weight: 500; padding: 10px 24px; background: #26261f; color: #ffffff;">Continue</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: #26261f; }
+    a { color: #26261f; } a:hover { color: #000000; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 840px; background: #ececea; display: flex; position: relative;">
+
+  <!-- dimmed app behind -->
+  <div style="width: 208px; background: #f7f7f5; border-right: 1px solid #d6d6d2; display: flex; flex-direction: column; padding: 14px 0; opacity: .45;">
+
+    <div style="margin: 0 8px 14px; padding: 9px 10px; background: #e4e4e0; display: flex; align-items: center; gap: 11px;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#26261f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/></svg>
+      <div style="display: flex; flex-direction: column; gap: 0px; min-width: 0;">
+        <div style="font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Project Alpha</div>
+        <div class="mono" style="font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: #6d6d66;">Corvellis &middot; 3 rooms</div>
+      </div>
+      <div style="margin-left: auto; font-size: 10px; color: #6d6d66;">&#8645;</div>
+    </div>
+
+      <div style="display: flex; align-items: center; gap: 11px; padding: 8px 16px; font-size: 13.5px; font-weight: 400; color: #6d6d66;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9a9a93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><rect x="3.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.4"/></svg><span>Overview</span></div>
+      <div style="display: flex; align-items: center; gap: 11px; padding: 8px 16px; font-size: 13.5px; font-weight: 400; color: #6d6d66;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9a9a93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.2a1.5 1.5 0 0 1 1.2.6l1 1.4h8.6A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/></svg><span>Documents</span></div>
+      <div style="background: #e4e4e0; display: flex; align-items: center; gap: 11px; padding: 8px 16px; font-size: 13.5px; font-weight: 500; color: #26261f;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#26261f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M7.5 9.5h9"/><path d="M7.5 13.5h5.5"/></svg><span>Dossier</span></div>
+      <div style="display: flex; align-items: center; gap: 11px; padding: 8px 16px; font-size: 13.5px; font-weight: 400; color: #6d6d66;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9a9a93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><path d="M4 5.6A1.6 1.6 0 0 1 5.6 4h12.8A1.6 1.6 0 0 1 20 5.6v9.3a1.6 1.6 0 0 1-1.6 1.6H9.2L4.8 20V5.6z"/></svg><span>Q&amp;A</span><span class="mono" style="margin-left: auto; font-size: 10px; color: #a3651f; background: #f6efe2; border: 1px solid #e6d4b3; padding: 0 6px;">6</span></div>
+      <div style="display: flex; align-items: center; gap: 11px; padding: 8px 16px; font-size: 13.5px; font-weight: 400; color: #6d6d66;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9a9a93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c0-2.9 2.5-5 5.5-5s5.5 2.1 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 15.2c1.9.6 3.2 2.2 3.2 4.3"/></svg><span>Groups</span></div>
+      <div style="display: flex; align-items: center; gap: 11px; padding: 8px 16px; font-size: 13.5px; font-weight: 400; color: #6d6d66;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9a9a93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><path d="M3 12.5h3.6L9 6.5l3.4 11 2.5-5h6"/></svg><span>Activity</span></div>
+      <div style="display: flex; align-items: center; gap: 11px; padding: 8px 16px; font-size: 13.5px; font-weight: 400; color: #6d6d66;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9a9a93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.4M12 18.6V21M21 12h-2.4M5.4 12H3M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7M18.4 18.4l-1.7-1.7M7.3 7.3 5.6 5.6"/></svg><span>Settings</span></div>
+
+    <div style="margin-top: auto; padding: 12px 16px 0; border-top: 1px solid #ececea; display: flex; align-items: center; gap: 10px;">
+      <div style="width: 26px; height: 26px; border-radius: 50%; background: #d6d6d2; flex: none;"></div>
+      <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+        <div style="font-size: 12px; font-weight: 500;">Priya Raman</div>
+        <div class="mono" style="font-size: 9.5px; color: #9a9a93;">Admin</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0; opacity: .45;">
+    <div style="height: 54px; background: #ffffff; border-bottom: 1px solid #d6d6d2; display: flex; align-items: center; padding: 0 24px; gap: 10px;">
+      <div style="font-size: 13.5px; color: #6d6d66;">Project Alpha</div>
+      <div style="font-size: 13.5px; color: #b4b4ae;">/</div>
+      <div style="font-size: 13.5px; font-weight: 600;">Module 3 &middot; Quality</div>
+    </div>
+    <div style="flex-grow: 1; background: #ffffff; border-right: 1px solid #d6d6d2;"></div>
+  </div>
+
+  <!-- drawer -->
+  <div style="position: absolute; top: 0; right: 0; width: 480px; height: 840px; background: #ffffff; border-left: 1px solid #b4b4ae; display: flex; flex-direction: column;">
+
+    <div style="padding: 20px 22px 16px; border-bottom: 1px solid #d6d6d2; display: flex; flex-direction: column; gap: 4px;">
+      <div style="display: flex; align-items: baseline; gap: 10px;">
+        <div style="font-size: 16px; font-weight: 600;">Upload to Module 3</div>
+        <div style="margin-left: auto; font-size: 15px; color: #9a9a93;">&#215;</div>
+      </div>
+      <div style="font-size: 12.5px; color: #6d6d66;">512 files &middot; 3.1 GB &middot; 24 folders</div>
+    </div>
+
+    <!-- tree preview -->
+    <div style="padding: 16px 22px; border-bottom: 1px solid #d6d6d2; display: flex; flex-direction: column; gap: 9px;">
+      <div style="display: flex; align-items: baseline; gap: 9px;">
+        <div class="mono" style="font-size: 10px; letter-spacing: .11em; text-transform: uppercase; color: #9a9a93;">Structure we&#39;ll create</div>
+        <div style="margin-left: auto; font-size: 11.5px; color: #6d6d66;">Cancel</div>
+      </div>
+      <div class="mono" style="font-size: 11.5px; line-height: 1.85; color: #26261f;">
+        <div>3.2.S Drug Substance<span style="color: #9a9a93;">  &middot; 4 folders</span></div>
+        <div style="padding-left: 16px; color: #6d6d66;">3.2.S.2 Manufacture<span style="color: #9a9a93;">  &middot; 62 files</span></div>
+        <div style="padding-left: 16px; color: #6d6d66;">3.2.S.4 Control of Drug Substance<span style="color: #9a9a93;">  &middot; 88 files</span></div>
+        <div style="padding-left: 16px; color: #6d6d66;">3.2.S.7 Stability<span style="color: #9a9a93;">  &middot; 141 files</span></div>
+        <div>3.2.P Drug Product<span style="color: #9a9a93;">  &middot; 8 folders</span></div>
+        <div style="padding-left: 16px; color: #9a9a93;">&hellip; 5 more</div>
+      </div>
+    </div>
+
+    <!-- per-file states -->
+    <div style="flex-grow: 1; padding: 16px 22px; display: flex; flex-direction: column; gap: 11px; min-height: 0;">
+      <div style="display: flex; align-items: baseline; gap: 9px;">
+        <div class="mono" style="font-size: 10px; letter-spacing: .11em; text-transform: uppercase; color: #9a9a93;">Files</div>
+        <div class="mono" style="margin-left: auto; font-size: 10.5px; color: #6d6d66;">318 / 512</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="display: flex; align-items: baseline; gap: 10px; font-size: 12.5px;">
+            <span style="overflow: hidden;">3.2.S.4-batch-analyses.pdf</span>
+            <span class="mono" style="margin-left: auto; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #6d6d66;">ready</span>
+          </div>
+          <div style="height: 3px; background: #ececea;"><div style="height: 3px; width: 100%; background: #26261f;"></div></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="display: flex; align-items: baseline; gap: 10px; font-size: 12.5px;">
+            <span>3.2.S.7-stability-protocol.docx</span>
+            <span class="mono" style="margin-left: auto; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #6d6d66;">converting</span>
+          </div>
+          <div style="height: 3px; background: #ececea;"><div style="height: 3px; width: 100%; background: #b4b4ae;"></div></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="display: flex; align-items: baseline; gap: 10px; font-size: 12.5px;">
+            <span>3.2.P.3-process-validation.pdf</span>
+            <span class="mono" style="margin-left: auto; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #6d6d66;">uploading 62%</span>
+          </div>
+          <div style="height: 3px; background: #ececea;"><div style="height: 3px; width: 62%; background: #26261f;"></div></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px; border-left: 2px solid #c47575; padding-left: 10px; margin-left: -12px;">
+          <div style="display: flex; align-items: baseline; gap: 10px; font-size: 12.5px;">
+            <span>3.2.P.8-stability-data.xlsx</span>
+            <span class="mono" style="margin-left: auto; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #c47575;">failed</span>
+            <span style="font-size: 11.5px; border: 1px solid #b4b4ae; padding: 1px 8px;">Retry</span>
+          </div>
+          <div style="font-size: 11.5px; color: #9a9a93;">Connection dropped &mdash; retrying this file won&#39;t restart the batch.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="display: flex; align-items: baseline; gap: 10px; font-size: 12.5px; color: #9a9a93;">
+            <span>3.2.P.5-specification.pdf</span>
+            <span class="mono" style="margin-left: auto; font-size: 10px; letter-spacing: .08em; text-transform: uppercase;">queued</span>
+          </div>
+          <div style="height: 3px; background: #ececea;"></div>
+        </div>
+
+        <div style="font-size: 11.5px; color: #9a9a93; padding-top: 2px;">&hellip; 507 more</div>
+      </div>
+    </div>
+
+    <div style="padding: 16px 22px; border-top: 1px solid #d6d6d2; display: flex; align-items: center; gap: 12px;">
+      <div style="font-size: 12px; color: #9a9a93; line-height: 1.4;">Safe to close &mdash;<br>the batch keeps going.</div>
+      <div style="margin-left: auto; font-size: 13.5px; padding: 9px 18px; border: 1px solid #b4b4ae; color: #6d6d66;">Pause</div>
+      <div style="font-size: 13.5px; font-weight: 500; padding: 9px 18px; background: #26261f; color: #ffffff;">Done</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: #26261f; }
+    a { color: #26261f; } a:hover { color: #000000; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 840px; background: #ececea; display: flex; flex-direction: column;">
+
+  <!-- viewer bar -->
+  <div style="height: 54px; background: #ffffff; border-bottom: 1px solid #d6d6d2; display: flex; align-items: center; padding: 0 18px; gap: 13px;">
+    <div style="font-size: 13.5px; color: #6d6d66;">← Room</div>
+    <div style="font-size: 14px; font-weight: 600;">specification-v3.pdf</div>
+    <div class="mono" style="font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: #6d6d66; border: 1px solid #b4b4ae; padding: 2px 8px;">v2 · current</div>
+
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 13px;">
+      <div class="mono" style="font-size: 11.5px; color: #6d6d66;">14 / 96</div>
+      <div style="display: flex; gap: 6px;">
+        <div style="width: 26px; height: 26px; border: 1px solid #b4b4ae; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6d6d66;">−</div>
+        <div style="width: 26px; height: 26px; border: 1px solid #b4b4ae; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6d6d66;">+</div>
+      </div>
+      <div class="mono" style="font-size: 9.5px; letter-spacing: .09em; text-transform: uppercase; color: #9a9a93; border: 1px dashed #b4b4ae; padding: 3px 9px;">DOWNLOAD</div>
+      <div class="mono" style="font-size: 9.5px; letter-spacing: .09em; text-transform: uppercase; color: #9a9a93; border: 1px dashed #b4b4ae; padding: 3px 9px;">activity recorded</div>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; min-height: 0;">
+
+    <!-- ============ TREE SIDE PANEL ============ -->
+    <div style="width: 244px; background: #ffffff; border-right: 1px solid #d6d6d2; display: flex; flex-direction: column; min-height: 0;">
+
+      <div style="padding: 13px 14px; border-bottom: 1px solid #ececea; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 12.5px; font-weight: 600;">Dossier</div>
+          <div class="mono" style="font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: #9a9a93;">all modules</div>
+          <div style="margin-left: auto; width: 20px; height: 20px; border: 1px solid #d6d6d2; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #6d6d66;">«</div>
+        </div>
+        <div style="border: 1px solid #d6d6d2; padding: 5px 9px; font-size: 11.5px; color: #9a9a93;">Filter files</div>
+      </div>
+
+      <div class="mono" style="flex-grow: 1; font-size: 11px; display: flex; flex-direction: column; padding: 8px 0; min-height: 0;">
+
+        <div style="padding: 5px 14px; display: flex; gap: 6px; align-items: baseline; color: #9a9a93;">
+          <span>▸</span><span>Module 1 · Administrative</span>
+        </div>
+        <div style="padding: 5px 14px; display: flex; gap: 6px; align-items: baseline; color: #9a9a93;">
+          <span>▸</span><span>Module 2 · CTD Summaries</span>
+        </div>
+        <div style="padding: 5px 14px; display: flex; gap: 6px; align-items: baseline;">
+          <span style="color: #9a9a93;">▾</span><span>Module 3 · Quality</span>
+        </div>
+        <div style="padding: 5px 14px 5px 26px; display: flex; gap: 6px; align-items: baseline;">
+          <span style="color: #9a9a93;">▾</span><span>3.2.S Drug Substance</span>
+        </div>
+
+        <div style="padding: 5px 14px 5px 40px; display: flex; gap: 6px; align-items: baseline; color: #6d6d66;">
+          <span style="color: #b4b4ae;">▸</span><span>3.2.S.1 General Information</span>
+        </div>
+
+        <div style="padding: 5px 14px 5px 40px; display: flex; gap: 6px; align-items: baseline; color: #6d6d66;">
+          <span style="color: #b4b4ae;">▸</span><span>3.2.S.2 Manufacture</span>
+        </div>
+
+        <div style="padding: 5px 14px 5px 40px; display: flex; gap: 6px; align-items: baseline;">
+          <span style="color: #9a9a93;">▾</span><span>3.2.S.4 Control of Drug&nbsp;Substance</span>
+        </div>
+
+        <!-- files under the open folder -->
+        <div style="padding: 5px 12px 5px 54px; display: flex; gap: 8px; align-items: baseline; background: #e4e4e0; border-left: 2px solid #26261f; margin-left: -2px;">
+          <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">specification-v3.pdf</span>
+          <span style="margin-left: auto; display: flex; align-items: center; gap: 3px; color: #6d6d66;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #6d92c4;"></span>3
+          </span>
+        </div>
+
+        <div style="padding: 5px 12px 5px 54px; display: flex; gap: 8px; align-items: baseline; color: #6d6d66;">
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">analytical-procedures.pdf</span>
+        </div>
+
+        <div style="padding: 5px 12px 5px 54px; display: flex; gap: 8px; align-items: baseline; color: #6d6d66;">
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">method-validation.pdf</span>
+          <span style="margin-left: auto; display: flex; align-items: center; gap: 3px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #c9a457;"></span>1
+          </span>
+        </div>
+
+        <div style="padding: 5px 12px 5px 54px; display: flex; gap: 8px; align-items: baseline; color: #6d6d66;">
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">batch-analyses.xlsx</span>
+          <span class="mono" style="margin-left: auto; font-size: 8.5px; letter-spacing: .06em; text-transform: uppercase; color: #9a9a93; border: 1px solid #d6d6d2; padding: 0 4px;">conv</span>
+        </div>
+
+        <div style="padding: 5px 14px 5px 40px; display: flex; gap: 6px; align-items: baseline; color: #6d6d66;">
+          <span style="color: #b4b4ae;">▸</span><span>3.2.S.7 Stability</span>
+        </div>
+
+        <div style="padding: 5px 14px 5px 26px; display: flex; gap: 6px; align-items: baseline;">
+          <span style="color: #9a9a93;">▸</span><span>3.2.P Drug Product</span>
+        </div>
+        <div style="padding: 5px 14px 5px 26px; display: flex; gap: 6px; align-items: baseline;">
+          <span style="color: #9a9a93;">▸</span><span>3.2.A Appendices</span>
+        </div>
+        <div style="padding: 5px 14px 5px 26px; display: flex; gap: 6px; align-items: baseline;">
+          <span style="color: #9a9a93;">▸</span><span>3.2.R Regional Information</span>
+        </div>
+        <div style="padding: 5px 14px; display: flex; gap: 6px; align-items: baseline; color: #9a9a93;">
+          <span>▸</span><span>Module 4 · Nonclinical</span>
+        </div>
+        <div style="padding: 5px 14px; display: flex; gap: 6px; align-items: baseline; color: #9a9a93;">
+          <span>▸</span><span>Module 5 · Clinical</span>
+        </div>
+      </div>
+
+      <div style="padding: 10px 14px; border-top: 1px solid #ececea; display: flex; align-items: center; gap: 8px;">
+        <div class="mono" style="font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: #9a9a93;">512 files</div>
+        <div class="mono" style="margin-left: auto; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66;">4 threads</div>
+      </div>
+    </div>
+
+    <!-- ============ DOCUMENT ============ -->
+    <div style="flex-grow: 1; display: flex; justify-content: center; padding: 22px 26px; overflow: hidden; min-width: 0;">
+      <div style="width: 560px; height: 740px; background: #ffffff; border: 1px solid #b4b4ae; position: relative; overflow: hidden;">
+
+        <!-- watermark layer, under the content -->
+        <div style="position: absolute; top: -90px; left: -90px; width: 760px; height: 940px; transform: rotate(-30deg); opacity: .3; pointer-events: none; display: flex; flex-direction: column; gap: 64px;">
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap; margin-left: -110px;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap; margin-left: -110px;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap; margin-left: -110px;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap; margin-left: -110px;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+          <div class="mono" style="font-size: 11px; color: #b4b4ae; white-space: nowrap;">sarah.chen@astrivax.com · Astrivax · Project Alpha · 2026-09-02 11:04 UTC</div>
+        </div>
+
+        <div style="position: relative; padding: 38px 42px; display: flex; flex-direction: column; gap: 15px;">
+
+          <div class="mono" style="font-size: 10px; color: #9a9a93;">3.2.S.4.1</div>
+          <div style="font-size: 15px; font-weight: 600;">Specification</div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="height: 6px; background: #e4e4e0; width: 100%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 96%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 86%;"></div>
+          </div>
+
+          <div style="font-size: 11.5px; line-height: 1.85; color: #26261f;">
+            The specification for the drug substance includes tests for
+            <span style="background: #a9c4e8; box-shadow: 0 0 0 1px #6d92c4;">residual solvents and elemental impurities, with limits set in accordance with ICH Q3D</span>,
+            applied to each batch released for clinical use.
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="height: 6px; background: #e4e4e0; width: 100%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 90%;"></div>
+          </div>
+
+          <div style="position: relative; font-size: 11.5px; line-height: 1.85; color: #26261f;">
+            Analytical procedures are validated per ICH Q2(R2).
+            <span style="background: #e8c98a; box-shadow: 0 0 0 1px #c9a457;">Batch analyses for the three registration batches are in Table 3.2.S.4-3</span>
+            and summarised below.
+
+            <div style="position: absolute; top: -44px; left: 84px; background: #26261f; padding: 7px 10px; display: flex; align-items: center; gap: 9px;">
+              <div style="width: 15px; height: 15px; border-radius: 50%; background: #e8c98a; box-shadow: 0 0 0 1.5px #ffffff;"></div>
+              <div style="width: 15px; height: 15px; border-radius: 50%; background: #a9c4e8;"></div>
+              <div style="width: 15px; height: 15px; border-radius: 50%; background: #e8aeae;"></div>
+              <div style="width: 1px; height: 15px; background: #6d6d66;"></div>
+              <div class="mono" style="font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: #ffffff;">Comment</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="height: 6px; background: #e4e4e0; width: 100%;"></div>
+            <div style="height: 6px; background: #e4e4e0; width: 70%;"></div>
+          </div>
+
+          <div style="border: 1px solid #d6d6d2; background: #f7f7f5; height: 128px; position: relative; display: flex; align-items: center; justify-content: center;">
+            <div class="mono" style="font-size: 10px; color: #9a9a93;">scanned certificate — no text layer</div>
+            <div style="position: absolute; top: 20px; left: 34px; width: 176px; height: 52px; background: #e8aeae; opacity: .5; box-shadow: 0 0 0 1.5px #c47575;"></div>
+            <div class="mono" style="position: absolute; top: 78px; left: 34px; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #c47575;">region anchor</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ COMMENT RAIL ============ -->
+    <div style="width: 318px; background: #ffffff; border-left: 1px solid #d6d6d2; display: flex; flex-direction: column; min-height: 0;">
+
+      <div style="padding: 13px 15px; border-bottom: 1px solid #d6d6d2; display: flex; flex-direction: column; gap: 9px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 20px; height: 20px; border: 1px solid #d6d6d2; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #6d6d66;">»</div>
+          <div style="font-size: 13px; font-weight: 600;">Comments</div>
+          <div class="mono" style="font-size: 10.5px; color: #6d6d66;">4 open</div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+          <div style="font-size: 11px; padding: 3px 9px; border: 1px solid #26261f; background: #26261f; color: #ffffff;">All</div>
+          <div style="width: 19px; height: 19px; border-radius: 50%; background: #e8c98a; box-shadow: 0 0 0 1px #c9a457;"></div>
+          <div style="width: 19px; height: 19px; border-radius: 50%; background: #a9c4e8; box-shadow: 0 0 0 1px #6d92c4;"></div>
+          <div style="width: 19px; height: 19px; border-radius: 50%; background: #e8aeae; box-shadow: 0 0 0 1px #c47575;"></div>
+          <div style="font-size: 11px; padding: 3px 9px; border: 1px solid #b4b4ae; color: #6d6d66;">Open</div>
+          <div style="font-size: 11px; padding: 3px 9px; border: 1px solid #b4b4ae; color: #6d6d66;">Shared</div>
+        </div>
+      </div>
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0;">
+
+        <div style="padding: 12px 15px; border-bottom: 1px solid #ececea; border-left: 3px solid #6d92c4; display: flex; flex-direction: column; gap: 7px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 21px; height: 21px; border-radius: 50%; background: #d6d6d2;"></div>
+            <div style="font-size: 12px; font-weight: 500;">Sarah Chen</div>
+            <div class="mono" style="margin-left: auto; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66; border: 1px solid #b4b4ae; padding: 1px 6px;">shared</div>
+          </div>
+          <div style="font-size: 11px; color: #9a9a93; border-left: 2px solid #d6d6d2; padding-left: 7px; line-height: 1.4;">“residual solvents and elemental impurities…”</div>
+          <div style="font-size: 12px; line-height: 1.5;">Which ICH Q3D option was applied for the parenteral route?</div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="mono" style="font-size: 10px; color: #6d6d66;">2 replies</div>
+            <div style="margin-left: auto; font-size: 11px; color: #6d6d66;">Reply</div>
+            <div style="font-size: 11px; color: #6d6d66;">Resolve</div>
+          </div>
+        </div>
+
+        <div style="padding: 12px 15px; border-bottom: 1px solid #ececea; border-left: 3px solid #c9a457; display: flex; flex-direction: column; gap: 7px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 21px; height: 21px; border-radius: 50%; background: #d6d6d2;"></div>
+            <div style="font-size: 12px; font-weight: 500;">David Okafor</div>
+            <div class="mono" style="margin-left: auto; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #9a9a93; border: 1px dashed #b4b4ae; padding: 1px 6px;">our side only</div>
+          </div>
+          <div style="font-size: 11px; color: #9a9a93; border-left: 2px solid #d6d6d2; padding-left: 7px; line-height: 1.4;">“Batch analyses for the three registration batches…”</div>
+          <div style="font-size: 12px; line-height: 1.5;">Check this against the stability data before we raise it.</div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="margin-left: auto; font-size: 11px; color: #6d6d66;">Reply</div>
+            <div style="font-size: 11px; color: #6d6d66;">Share</div>
+          </div>
+        </div>
+
+        <div style="padding: 12px 15px; border-bottom: 1px solid #ececea; border-left: 3px solid #c47575; display: flex; flex-direction: column; gap: 7px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 21px; height: 21px; border-radius: 50%; background: #d6d6d2;"></div>
+            <div style="font-size: 12px; font-weight: 500;">Sarah Chen</div>
+            <div class="mono" style="margin-left: auto; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66; border: 1px solid #b4b4ae; padding: 1px 6px;">region</div>
+          </div>
+          <div style="font-size: 12px; line-height: 1.5;">This certificate is unsigned. Is there an executed copy?</div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="margin-left: auto; font-size: 11px; color: #6d6d66;">Reply</div>
+            <div style="font-size: 11px; color: #6d6d66;">Resolve</div>
+          </div>
+        </div>
+
+        <div style="padding: 12px 15px; border-bottom: 1px solid #ececea; border-left: 3px solid #d6d6d2; background: #f7f7f5; display: flex; flex-direction: column; gap: 7px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 21px; height: 21px; border-radius: 50%; background: #d6d6d2;"></div>
+            <div style="font-size: 12px; font-weight: 500; color: #6d6d66;">Priya Raman</div>
+            <div class="mono" style="margin-left: auto; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #6d6d66; border: 1px solid #b4b4ae; padding: 1px 6px;">from v1</div>
+          </div>
+          <div style="font-size: 12px; line-height: 1.5; color: #6d6d66;">Are these limits tighter than the compendial ones?</div>
+          <div style="font-size: 11px; color: #9a9a93; line-height: 1.4; border-top: 1px dashed #d6d6d2; padding-top: 6px;">Carried over from v1 — the text it pointed at isn't in this version.</div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="margin-left: auto; font-size: 11px; color: #6d6d66;">Reply</div>
+            <div style="font-size: 11px; color: #6d6d66;">Re-anchor</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
