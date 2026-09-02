@@ -1,0 +1,682 @@
+// Veyra MVP — database schema
+// Source of truth: docs/mvp-plan.md §4. `→` in that document marks a column the
+// MVP writes only one value into; those columns are kept here so turning on the
+// deferred flows (facilitator, per-document permissions, redlining) is a guard
+// removal, not a migration on live deal data (D6).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  // Transaction pooler (Supabase, port 6543, pgbouncer) — app runtime.
+  url        = env("DATABASE_URL")
+  // Session pooler (port 5432) — migrations only; DDL can't run through
+  // pgbouncer's transaction pooling.
+  directUrl  = env("DIRECT_URL")
+  extensions = [citext, pgcrypto]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums — `facilitator` and per-document scope values are present from day one
+// and rejected at the validation layer, not the schema (D6).
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Side {
+  discloser
+  recipient
+  facilitator
+}
+
+/// Room-scoped access ladder (requirements.md §1). `admin` ⊃ `contributor` ⊃
+/// `reviewer`. The inviter only ever picks the level; side comes from company.
+enum ParticipantRole {
+  admin
+  contributor
+  reviewer
+}
+
+enum ParticipantStatus {
+  invited
+  active
+  revoked
+}
+
+enum UserStatus {
+  invited
+  active
+  suspended
+}
+
+enum TenantMemberRole {
+  owner
+  admin
+  member
+}
+
+enum RoomStatus {
+  draft
+  active
+  closed
+}
+
+enum CapabilityScope {
+  room
+  module
+  folder
+  document
+}
+
+enum ModuleSection {
+  dossier
+  documents
+}
+
+enum RenderStatus {
+  pending
+  processing
+  ready
+  failed
+}
+
+enum UploadBatchStatus {
+  pending
+  uploading
+  processing
+  completed
+  failed
+}
+
+enum UploadFileStatus {
+  queued
+  uploading
+  processing
+  ready
+  failed
+}
+
+enum AnnotationColor {
+  amber
+  blue
+  rose
+}
+
+enum AnchorType {
+  text_quote
+  region
+}
+
+enum ThreadStatus {
+  open
+  resolved
+}
+
+enum ThreadVisibility {
+  side
+  room
+}
+
+enum InvitationStatus {
+  pending
+  accepted
+  expired
+  revoked
+}
+
+enum EmailStatus {
+  queued
+  sending
+  sent
+  failed
+}
+
+enum NotificationChannel {
+  email
+}
+
+enum NotificationFrequency {
+  immediate
+  batched
+  daily
+  off
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identity
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Company {
+  id            String          @id @default(cuid())
+  name          String
+  legalName     String?         @map("legal_name")
+  primaryDomain String?         @map("primary_domain")
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  domains       CompanyDomain[]
+  tenant        Tenant?
+  discloserFor  Room[]          @relation("DiscloserCompany")
+  recipientFor  Room[]          @relation("RecipientCompany")
+  participants  RoomParticipant[]
+  invitations   Invitation[]
+
+  @@map("companies")
+}
+
+model CompanyDomain {
+  id        String  @id @default(cuid())
+  companyId String  @map("company_id")
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  domain    String
+  verified  Boolean @default(false)
+
+  @@unique([domain])
+  @@index([companyId])
+  @@map("company_domains")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique @db.Citext
+  name         String?
+  passwordHash String?    @map("password_hash")
+  status       UserStatus @default(invited)
+  lastLoginAt  DateTime?  @map("last_login_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  tenantMemberships TenantMember[]
+  sessions          Session[]
+  passwordResetTokens PasswordResetToken[]
+  participations    RoomParticipant[]
+  invitesSent       Invitation[]      @relation("InvitedBy")
+  invitesAccepted   Invitation[]      @relation("AcceptedBy")
+  notificationPrefs NotificationPref[]
+  auditEvents       AuditEvent[]
+
+  @@map("users")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  companyId String   @unique @map("company_id")
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan      String   @default("pilot")
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  members TenantMember[]
+  rooms   Room[]
+
+  @@map("tenants")
+}
+
+model TenantMember {
+  id       String           @id @default(cuid())
+  tenantId String           @map("tenant_id")
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String           @map("user_id")
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     TenantMemberRole @default(member)
+
+  @@unique([tenantId, userId])
+  @@index([userId])
+  @@map("tenant_members")
+}
+
+/// Server-side sessions (D-auth): no JWT, so revocation on a live deal room is
+/// instant — delete the row / set `revokedAt`.
+model Session {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  ip        String?
+  userAgent String?   @map("user_agent")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// Single-use, short-TTL (15 min — FR-AUTH) password reset tokens. Only the
+/// hash is stored; the raw token goes out in the reset email.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rooms & participation
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Room {
+  id                  String     @id @default(cuid())
+  tenantId            String     @map("tenant_id")
+  tenant              Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name                String
+  status              RoomStatus @default(draft)
+  creatorSide         Side       @default(discloser) @map("creator_side")
+  discloserCompanyId  String?    @map("discloser_company_id")
+  discloserCompany    Company?   @relation("DiscloserCompany", fields: [discloserCompanyId], references: [id])
+  recipientCompanyId  String?    @map("recipient_company_id")
+  recipientCompany    Company?   @relation("RecipientCompany", fields: [recipientCompanyId], references: [id])
+  ndaRequired         Boolean    @default(true) @map("nda_required")
+  ndaVersion          String?    @map("nda_version")
+  allowDownload       Boolean    @default(false) @map("allow_download")
+  watermarkEnabled    Boolean    @default(true) @map("watermark_enabled")
+  watermarkTemplate   String?    @map("watermark_template")
+  createdBy           String?    @map("created_by")
+  createdAt           DateTime   @default(now()) @map("created_at")
+
+  participants  RoomParticipant[]
+  modules       RoomModule[]
+  folders       Folder[]
+  documents     Document[]
+  uploadBatches UploadBatch[]
+  annotations   Annotation[]
+  threads       CommentThread[]
+  invitations   Invitation[]
+  auditEvents   AuditEvent[]
+  notificationPrefs NotificationPref[]
+
+  @@index([tenantId])
+  @@map("rooms")
+}
+
+model RoomParticipant {
+  id            String            @id @default(cuid())
+  roomId        String            @map("room_id")
+  room          Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId        String            @map("user_id")
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId     String            @map("company_id")
+  company       Company           @relation(fields: [companyId], references: [id])
+  side          Side
+  role          ParticipantRole
+  status        ParticipantStatus @default(invited)
+  invitedBy     String?           @map("invited_by")
+  acceptedAt    DateTime?         @map("accepted_at")
+  ndaAcceptedAt DateTime?         @map("nda_accepted_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  capabilities        ParticipantCapability[]
+  annotations         Annotation[]
+  commentsAuthored    Comment[]
+  threadsCreated      CommentThread[]         @relation("ThreadCreatedBy")
+  threadsResolved     CommentThread[]         @relation("ThreadResolvedBy")
+  mentions            CommentMention[]
+  renditions          DocumentRendition[]
+  auditEvents         AuditEvent[]
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("room_participants")
+}
+
+/// MVP holds only room-scoped rows derived from `role`. Per-document permission
+/// tiers (v2) are new rows with `scopeType = document`, not a new table.
+model ParticipantCapability {
+  id            String          @id @default(cuid())
+  participantId String          @map("participant_id")
+  participant   RoomParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  capability    String
+  allow         Boolean         @default(true)
+  scopeType     CapabilityScope @default(room) @map("scope_type")
+  scopeId       String?         @map("scope_id")
+
+  @@index([participantId])
+  @@map("participant_capabilities")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dossier content — modules are data, not code (D7).
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ModuleTemplate {
+  id    String               @id @default(cuid())
+  key   String               @unique // 'ctd'
+  name  String                        // 'Common Technical Document'
+  nodes ModuleTemplateNode[]
+
+  @@map("module_templates")
+}
+
+model ModuleTemplateNode {
+  id         String         @id @default(cuid())
+  templateId String         @map("template_id")
+  template   ModuleTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  code       String // '1'..'5'
+  title      String
+  sortOrder  Int            @map("sort_order")
+
+  roomModules RoomModule[]
+
+  @@unique([templateId, code])
+  @@map("module_template_nodes")
+}
+
+model RoomModule {
+  id                   String              @id @default(cuid())
+  roomId               String              @map("room_id")
+  room                 Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  code                 String
+  title                String
+  sortOrder            Int                 @map("sort_order")
+  sourceTemplateNodeId String?             @map("source_template_node_id")
+  sourceTemplateNode   ModuleTemplateNode? @relation(fields: [sourceTemplateNodeId], references: [id])
+  section              ModuleSection       @default(dossier)
+
+  folders   Folder[]
+  documents Document[]
+  batches   UploadBatch[]
+
+  @@unique([roomId, section, code])
+  @@index([roomId])
+  @@map("room_modules")
+}
+
+model Folder {
+  id             String     @id @default(cuid())
+  roomId         String     @map("room_id")
+  room           Room       @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomModuleId   String     @map("room_module_id")
+  roomModule     RoomModule @relation(fields: [roomModuleId], references: [id], onDelete: Cascade)
+  parentFolderId String?    @map("parent_folder_id")
+  parentFolder   Folder?    @relation("FolderTree", fields: [parentFolderId], references: [id], onDelete: Cascade)
+  children       Folder[]   @relation("FolderTree")
+  name           String
+  path           String
+  sortOrder      Int        @default(0) @map("sort_order")
+  createdBy      String?    @map("created_by")
+  deletedAt      DateTime?  @map("deleted_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  documents Document[]
+
+  @@index([roomId, roomModuleId])
+  @@index([parentFolderId])
+  @@map("folders")
+}
+
+model Document {
+  id               String            @id @default(cuid())
+  roomId           String            @map("room_id")
+  room             Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomModuleId     String            @map("room_module_id")
+  roomModule       RoomModule        @relation(fields: [roomModuleId], references: [id], onDelete: Cascade)
+  folderId         String?           @map("folder_id")
+  folder           Folder?           @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  name             String
+  currentVersionId String?           @unique @map("current_version_id")
+  currentVersion   DocumentVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  createdBy        String?           @map("created_by")
+  deletedAt        DateTime?         @map("deleted_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+
+  versions DocumentVersion[] @relation("DocumentVersions")
+
+  @@index([roomId, roomModuleId])
+  @@index([folderId])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id             String       @id @default(cuid())
+  documentId     String       @map("document_id")
+  document       Document     @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  versionNo      Int          @map("version_no")
+  storageKey     String       @map("storage_key")
+  byteSize       BigInt       @map("byte_size")
+  checksumSha256 String?      @map("checksum_sha256")
+  mimeType       String       @map("mime_type")
+  pageCount      Int?         @map("page_count")
+  renderStatus   RenderStatus @default(pending) @map("render_status")
+  renderedPdfKey String?      @map("rendered_pdf_key")
+  uploadedBy     String?      @map("uploaded_by")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  currentOf     Document?           @relation("CurrentVersion")
+  renditions    DocumentRendition[]
+  annotations   Annotation[]
+  threads       CommentThread[]     @relation("ThreadVersion")
+  carriedThreads CommentThread[]    @relation("ThreadCarriedFrom")
+
+  @@unique([documentId, versionNo])
+  @@map("document_versions")
+}
+
+model UploadBatch {
+  id           String            @id @default(cuid())
+  roomId       String            @map("room_id")
+  room         Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomModuleId String?           @map("room_module_id")
+  roomModule   RoomModule?       @relation(fields: [roomModuleId], references: [id], onDelete: SetNull)
+  createdBy    String?           @map("created_by")
+  status       UploadBatchStatus @default(pending)
+  fileCount    Int               @default(0) @map("file_count")
+  bytesTotal   BigInt            @default(0) @map("bytes_total")
+  folderId     String?           @map("folder_id")
+  startedAt    DateTime?         @map("started_at")
+  finishedAt   DateTime?         @map("finished_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+
+  files UploadBatchFile[]
+
+  @@index([roomId])
+  @@map("upload_batches")
+}
+
+/// One file within a folder-drop batch (mvp-plan §5.3). Tracks the per-file
+/// state the upload drawer shows and lets a failed file retry without redoing
+/// the batch. `relativePath` is the browser's `webkitRelativePath`.
+model UploadBatchFile {
+  id           String           @id @default(cuid())
+  batchId      String           @map("batch_id")
+  batch        UploadBatch      @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  relativePath String           @map("relative_path")
+  status       UploadFileStatus @default(queued)
+  error        String?
+  byteSize     BigInt?          @map("byte_size")
+  documentId   String?          @map("document_id")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@unique([batchId, relativePath])
+  @@index([batchId])
+  @@map("upload_batch_files")
+}
+
+/// Per-viewer watermarked copy, cached on (version, participant) (D9).
+model DocumentRendition {
+  id                String          @id @default(cuid())
+  documentVersionId String          @map("document_version_id")
+  documentVersion   DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  participantId     String          @map("participant_id")
+  participant       RoomParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  storageKey        String          @map("storage_key")
+  watermarkText     String          @map("watermark_text")
+  templateHash      String          @map("template_hash")
+  byteSize          BigInt          @map("byte_size")
+  createdAt         DateTime        @default(now()) @map("created_at")
+
+  @@unique([documentVersionId, participantId])
+  @@map("document_renditions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Review — one shape, one direction, no circular FKs (mvp-plan §4):
+//   annotation with no thread      → a private marker
+//   thread with an annotationId    → an inline anchored comment
+//   thread with annotationId NULL  → a document-level comment
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Annotation {
+  id                  String          @id @default(cuid())
+  roomId              String          @map("room_id")
+  room                Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  documentVersionId   String          @map("document_version_id")
+  documentVersion     DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  authorParticipantId String          @map("author_participant_id")
+  authorParticipant   RoomParticipant @relation(fields: [authorParticipantId], references: [id])
+  color               AnnotationColor
+  anchorType          AnchorType      @map("anchor_type")
+  /// W3C-style anchor payload — { page, quote{exact,prefix,suffix}, position{start,end}, rects[] }.
+  /// rects are page-relative fractions and always present; for `region` they are the anchor.
+  anchor              Json
+  createdAt           DateTime        @default(now()) @map("created_at")
+  deletedAt           DateTime?       @map("deleted_at")
+
+  thread CommentThread?
+
+  @@index([documentVersionId])
+  @@map("annotations")
+}
+
+model CommentThread {
+  id                   String           @id @default(cuid())
+  roomId               String           @map("room_id")
+  room                 Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  documentVersionId    String           @map("document_version_id")
+  documentVersion      DocumentVersion  @relation("ThreadVersion", fields: [documentVersionId], references: [id], onDelete: Cascade)
+  annotationId         String?          @unique @map("annotation_id")
+  annotation           Annotation?      @relation(fields: [annotationId], references: [id], onDelete: SetNull)
+  status               ThreadStatus     @default(open)
+  visibility           ThreadVisibility @default(side)
+  createdBy            String           @map("created_by")
+  createdByParticipant RoomParticipant  @relation("ThreadCreatedBy", fields: [createdBy], references: [id])
+  resolvedBy           String?          @map("resolved_by")
+  resolvedByParticipant RoomParticipant? @relation("ThreadResolvedBy", fields: [resolvedBy], references: [id])
+  resolvedAt           DateTime?        @map("resolved_at")
+  carriedFromVersionId String?          @map("carried_from_version_id")
+  carriedFromVersion   DocumentVersion? @relation("ThreadCarriedFrom", fields: [carriedFromVersionId], references: [id], onDelete: SetNull)
+  anchorConfidence     Float?           @map("anchor_confidence")
+  createdAt            DateTime         @default(now()) @map("created_at")
+
+  comments Comment[]
+
+  @@index([documentVersionId])
+  @@index([roomId, status])
+  @@map("comment_threads")
+}
+
+model Comment {
+  id                  String          @id @default(cuid())
+  threadId            String          @map("thread_id")
+  thread              CommentThread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorParticipantId String          @map("author_participant_id")
+  authorParticipant   RoomParticipant @relation(fields: [authorParticipantId], references: [id])
+  /// Rich-text body as a document node (tiptap/prosemirror-style JSON).
+  body                Json
+  createdAt           DateTime        @default(now()) @map("created_at")
+  editedAt            DateTime?       @map("edited_at")
+  deletedAt           DateTime?       @map("deleted_at")
+
+  mentions CommentMention[]
+
+  @@index([threadId, createdAt])
+  @@map("comments")
+}
+
+model CommentMention {
+  commentId     String          @map("comment_id")
+  comment       Comment         @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  participantId String          @map("participant_id")
+  participant   RoomParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, participantId])
+  @@map("comment_mentions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Operations
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Invitation {
+  id             String           @id @default(cuid())
+  roomId         String           @map("room_id")
+  room           Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  email          String           @db.Citext
+  companyId      String?          @map("company_id")
+  company        Company?         @relation(fields: [companyId], references: [id])
+  side           Side
+  role           ParticipantRole
+  tokenHash      String           @unique @map("token_hash")
+  invitedBy      String?          @map("invited_by")
+  invitedByUser  User?            @relation("InvitedBy", fields: [invitedBy], references: [id])
+  status         InvitationStatus @default(pending)
+  expiresAt      DateTime         @map("expires_at")
+  acceptedUserId String?          @map("accepted_user_id")
+  acceptedUser   User?            @relation("AcceptedBy", fields: [acceptedUserId], references: [id])
+  sentAt         DateTime?        @map("sent_at")
+  remindedAt     DateTime?        @map("reminded_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  @@index([roomId])
+  @@index([email])
+  @@map("invitations")
+}
+
+/// Transactional email outbox — a provider outage can't lose an invite.
+model EmailMessage {
+  id                String      @id @default(cuid())
+  toEmail           String      @map("to_email") @db.Citext
+  template          String
+  payload           Json
+  status            EmailStatus @default(queued)
+  providerMessageId String?     @map("provider_message_id")
+  attempts          Int         @default(0)
+  lastError         String?     @map("last_error")
+  scheduledFor      DateTime?   @map("scheduled_for")
+  sentAt            DateTime?   @map("sent_at")
+  createdAt         DateTime    @default(now()) @map("created_at")
+
+  @@index([status, scheduledFor])
+  @@map("email_messages")
+}
+
+model NotificationPref {
+  userId    String                @map("user_id")
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomId    String                @map("room_id")
+  room      Room                  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  channel   NotificationChannel   @default(email)
+  frequency NotificationFrequency @default(batched)
+
+  @@id([userId, roomId, channel])
+  @@map("notification_prefs")
+}
+
+/// Append-only. Monthly partitions are added in a follow-up raw migration once
+/// volume warrants it (mvp-plan §4).
+model AuditEvent {
+  id                String           @id @default(cuid())
+  // Nullable: auth/platform events (login, password reset, tenant provisioning)
+  // are not room-scoped. Room content events always set it.
+  roomId            String?          @map("room_id")
+  room              Room?            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  actorUserId       String?          @map("actor_user_id")
+  actorUser         User?            @relation(fields: [actorUserId], references: [id])
+  actorParticipantId String?         @map("actor_participant_id")
+  actorParticipant  RoomParticipant? @relation(fields: [actorParticipantId], references: [id])
+  action            String
+  targetType        String?          @map("target_type")
+  targetId          String?          @map("target_id")
+  metadata          Json             @default("{}")
+  ip                String?
+  userAgent         String?          @map("user_agent")
+  createdAt         DateTime         @default(now()) @map("created_at")
+
+  @@index([roomId, createdAt])
+  @@map("audit_events")
+}

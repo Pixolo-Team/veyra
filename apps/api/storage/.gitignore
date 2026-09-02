@@ -1,0 +1,3 @@
+# Local document storage — contents are never committed.
+*
+!.gitignore

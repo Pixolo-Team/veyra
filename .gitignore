@@ -13,6 +13,18 @@ dist-ssr
 *.local
 storybook-static
 
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local document storage (apps/api)
+apps/api/storage/*
+!apps/api/storage/.gitignore
+
+# Prisma
+apps/api/src/generated
+
 # tsc -b build info
 *.tsbuildinfo
 

@@ -9,8 +9,12 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace @veyra/playground",
+    "dev:api": "npm run dev --workspace @veyra/api",
     "build": "npm run build --workspaces --if-present",
-    "typecheck": "tsc -b --force",
+    "typecheck": "tsc -b --force && npm run typecheck --workspace @veyra/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace @veyra/api",
+    "prisma:deploy": "npm run prisma:deploy --workspace @veyra/api",
+    "db:seed": "npm run db:seed --workspace @veyra/api",
     "lint": "oxlint",
     "storybook": "npm run storybook --workspace @veyra/design-system",
     "build-storybook": "npm run build-storybook --workspace @veyra/design-system",

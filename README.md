@@ -22,9 +22,21 @@ veyra/
 ├─ package.json              # workspace root; scripts here delegate
 ├─ tsconfig.base.json        # compiler options every workspace extends
 ├─ packages/
-│  └─ design-system/         # @veyra/design-system — tokens, theme, components, Storybook
+│  ├─ design-system/         # @veyra/design-system — tokens, theme, components, Storybook
+│  └─ contracts/             # @veyra/contracts — shared zod schemas + types (FE ⇄ BE)
 └─ apps/
-   └─ playground/            # @veyra/playground — demo app consuming the design system
+   ├─ playground/            # @veyra/playground — demo app consuming the design system
+   └─ api/                   # @veyra/api — NestJS + Prisma backend (Supabase Postgres)
+```
+
+The backend is Phase 0 of [docs/mvp-plan.md](docs/mvp-plan.md); see
+[apps/api/README.md](apps/api/README.md) for setup, the Supabase connection
+model, and the storage drivers.
+
+```bash
+npm run dev:api             # API on http://localhost:4000/api
+npm run prisma:migrate      # apply a new migration
+npm run db:seed             # CTD template + first admin
 ```
 
 `@veyra/design-system` is consumed straight from TypeScript source via its
