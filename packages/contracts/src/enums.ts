@@ -16,7 +16,8 @@ export type ParticipantRole = z.infer<typeof participantRoleSchema>;
 export const participantStatusSchema = z.enum(['invited', 'active', 'revoked']);
 export type ParticipantStatus = z.infer<typeof participantStatusSchema>;
 
-export const roomStatusSchema = z.enum(['draft', 'active', 'closed']);
+export const roomStatusSchema = z.enum(['draft', 'active', 'closed', 'archived']);
+export type RoomStatus = z.infer<typeof roomStatusSchema>;
 
 export const invitationStatusSchema = z.enum(['pending', 'accepted', 'expired', 'revoked']);
 export type InvitationStatus = z.infer<typeof invitationStatusSchema>;
@@ -28,8 +29,13 @@ export const annotationColorSchema = z.enum(['amber', 'blue', 'rose']);
 export type AnnotationColor = z.infer<typeof annotationColorSchema>;
 
 export const anchorTypeSchema = z.enum(['text_quote', 'region']);
+export type AnchorType = z.infer<typeof anchorTypeSchema>;
+
 export const threadStatusSchema = z.enum(['open', 'resolved']);
+export type ThreadStatus = z.infer<typeof threadStatusSchema>;
+
 export const threadVisibilitySchema = z.enum(['side', 'room']);
+export type ThreadVisibility = z.infer<typeof threadVisibilitySchema>;
 
 export const renderStatusSchema = z.enum(['pending', 'processing', 'ready', 'failed']);
 export const uploadBatchStatusSchema = z.enum([

@@ -4,21 +4,47 @@
     {
       "name": "storybook",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "storybook", "--", "--no-open", "--quiet"],
+      "runtimeArgs": [
+        "run",
+        "storybook",
+        "--",
+        "--no-open",
+        "--quiet"
+      ],
       "port": 6006
     },
     {
       "name": "app",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 5173
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 5173,
+      "autoPort": true
     },
     {
       "name": "api",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--workspace", "@veyra/api"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--workspace",
+        "@veyra/api"
+      ],
       "port": 4000,
-      "url": "http://localhost:4000/api/health"
+      "url": "http://localhost:4000"
+    },
+    {
+      "name": "playground",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--workspace",
+        "@veyra/playground"
+      ],
+      "port": 5174
     }
   ]
 }

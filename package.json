@@ -8,17 +8,20 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace @veyra/playground",
+    "dev": "npm run dev --workspace @veyra/web",
     "dev:api": "npm run dev --workspace @veyra/api",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "tsc -b --force && npm run typecheck --workspace @veyra/api",
     "prisma:migrate": "npm run prisma:migrate --workspace @veyra/api",
     "prisma:deploy": "npm run prisma:deploy --workspace @veyra/api",
     "db:seed": "npm run db:seed --workspace @veyra/api",
+    "db:dev-user": "npm run db:dev-user --workspace @veyra/api",
     "lint": "oxlint",
     "storybook": "npm run storybook --workspace @veyra/design-system",
     "build-storybook": "npm run build-storybook --workspace @veyra/design-system",
-    "a11y": "npm run a11y --workspace @veyra/design-system"
+    "a11y": "npm run a11y --workspace @veyra/design-system",
+    "dev:playground": "npm run dev --workspace @veyra/playground",
+    "db:seed-dossier": "npm run db:seed-dossier --workspace @veyra/api --"
   },
   "devDependencies": {
     "oxlint": "^1.75.0",

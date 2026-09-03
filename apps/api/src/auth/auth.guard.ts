@@ -37,14 +37,27 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) return true;
-
     const req = context.switchToHttp().getRequest<AuthedRequest>();
     const token = req.cookies?.[this.cookieName] as string | undefined;
-    if (!token) throw new UnauthorizedException('Not signed in');
+
+    /*
+     * `@Public` means a session is not *required*, not that one is ignored.
+     *
+     * A public route reached by a signed-in caller should still know who they
+     * are — `/auth/me` is the whole reason: it has to answer "nobody" without
+     * a 401, and "you" when there is a cookie. So the resolve still runs, and
+     * only the throwing is conditional.
+     */
+    if (!token) {
+      if (isPublic) return true;
+      throw new UnauthorizedException('Not signed in');
+    }
 
     const resolved = await this.sessions.resolve(token);
-    if (!resolved) throw new UnauthorizedException('Session expired');
+    if (!resolved) {
+      if (isPublic) return true;
+      throw new UnauthorizedException('Session expired');
+    }
 
     req.user = resolved.user;
     req.sessionToken = token;

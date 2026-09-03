@@ -15,6 +15,13 @@ export interface SemanticColors {
   brandActive: string;
   brandSubtle: string;
   brandBorder: string;
+  /**
+   * The logo mark's ground. Identical in both modes on purpose: a logo is an
+   * identity, not a themed surface, and the mark's white strokes need a dark
+   * enough field to read — which the dark-mode `brand` (a lighter step, chosen
+   * to be legible *as text* on near-black) cannot give them.
+   */
+  brandMark: string;
 
   /*
    * Status. Each status is one colour plus its tint.
@@ -52,6 +59,33 @@ export interface SemanticColors {
   bgSurfaceRaised: string;
   bgHover: string;
   bgActive: string;
+  /**
+   * The faintest grouping fill: "these rows belong together", inside a panel
+   * that is already a surface.
+   *
+   * Tinted toward the brand rather than down the neutral ramp, and that is the
+   * whole point of the role. A neutral wash on a white panel is the same colour
+   * as the canvas around it, so it doesn't read as a group — it reads as the
+   * page showing through a hole in the panel. It is also deliberately weaker
+   * than `brandSubtle`, which marks the *selected* row and has to stay the one
+   * thing colour picks out.
+   */
+  bgWash: string;
+  /*
+   * Sidebar. The rail is told apart from the page by its *ground*, not by a
+   * rule down its edge — so it needs a tint that reads as a distinct surface
+   * next to both the canvas and the white cards floating on it, plus its own
+   * hover and selected states that stay visible on that tint (`bgHover` is
+   * tuned for the canvas and vanishes here).
+   *
+   * There is deliberately no sidebar border role. Adding one is how the rule
+   * comes back.
+   */
+  sidebarBg: string;
+  sidebarText: string;
+  sidebarTextActive: string;
+  sidebarActiveBg: string;
+  sidebarHoverBg: string;
 
   /* Lines */
   border: string;
@@ -69,6 +103,7 @@ export const lightColors: SemanticColors = {
   brandActive: veyra[6],
   brandSubtle: veyra[0],
   brandBorder: veyra[2],
+  brandMark: veyra[5],
 
   success: success[7],
   successSubtle: success[0],
@@ -88,11 +123,26 @@ export const lightColors: SemanticColors = {
   link: veyra[5],
 
   bgBase: neutral[0],
-  bgCanvas: neutral[1],
+  /*
+   * The canvas is a step of real grey, not near-white, and that is
+   * load-bearing: the chrome separates regions by ground instead of by rules,
+   * which only works if a white surface visibly lifts off the page behind it.
+   * At neutral[1] the step was too small to see and every panel needed a
+   * border to exist.
+   */
+  bgCanvas: neutral[2],
   bgSurface: neutral[0],
   bgSurfaceRaised: neutral[0],
   bgHover: neutral[1],
   bgActive: neutral[2],
+  bgWash: '#f8faff', // white → veyra[0], just under halfway
+  // The rail is a surface floating on the canvas, like every other panel — so
+  // it takes the same white, and the grey around it draws its edge.
+  sidebarBg: neutral[0],
+  sidebarText: neutral[7],
+  sidebarTextActive: veyra[5],
+  sidebarActiveBg: veyra[0],
+  sidebarHoverBg: neutral[1],
 
   border: neutral[3],
   borderStrong: neutral[5],
@@ -108,8 +158,9 @@ export const darkColors: SemanticColors = {
   brand: veyra[3],
   brandHover: veyra[2],
   brandActive: veyra[4],
-  brandSubtle: '#1c2140',
+  brandSubtle: '#1b2750',
   brandBorder: veyra[7],
+  brandMark: veyra[5], // deliberately not veyra[3] — see the role's note
 
   success: success[4],
   successSubtle: '#0a2a1c',
@@ -134,6 +185,12 @@ export const darkColors: SemanticColors = {
   bgSurfaceRaised: '#1f242f',
   bgHover: '#232936',
   bgActive: '#2b3241',
+  bgWash: '#191f30', // bgSurface → brandSubtle, a quarter of the way
+  sidebarBg: '#181c25', // the surface white's counterpart
+  sidebarText: '#a8b0c0',
+  sidebarTextActive: '#8eb0fb',
+  sidebarActiveBg: '#1b2750',
+  sidebarHoverBg: '#232936',
 
   border: '#2b3140',
   borderStrong: '#5f6980',

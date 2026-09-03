@@ -9,19 +9,32 @@ interface Viewer {
   participant: RoomParticipant;
   name: string | null;
   email: string;
+  /** The company the viewer is in this room on behalf of. */
+  company: string | null;
 }
 
 /**
- * Per-viewer watermarked renditions (D9). The un-stamped PDF never reaches the
- * browser once `room.watermark_enabled` is on. Stamped lazily on first view and
- * cached on `(version, participant)` in `document_renditions`; a template change
- * bumps `template_hash` and stale rows fall out.
+ * Watermarked renditions (D9). The un-stamped PDF never reaches the browser
+ * once `room.watermark_enabled` is on. Stamped lazily on first view and cached
+ * on `(version, participant)` in `document_renditions`; a template change bumps
+ * `template_hash` and stale rows fall out.
  *
- * The mark is burned into every page's content stream server-side. NOTE: this
- * uses pdf-lib text, which lands in the extractable text layer — acceptable
- * while text-quote anchoring on converted documents (D4) is not yet built, but
- * before that ships the mark must move to a raster/vector stamp so it can't
- * corrupt anchors.
+ * The mark itself names the reader's *company* by default — see `text` — while
+ * the cache stays per participant, so a room that switches to a per-reader
+ * template gets correct copies without a migration.
+ *
+ * The mark is burned into every page's content stream server-side, which is the
+ * point: it survives a download, where an overlay drawn by the browser would
+ * not.
+ *
+ * It is stamped as pdf-lib *text*, so it lands in the extractable text layer
+ * and a reader dragging across a page selects the watermark along with the
+ * prose. The viewer is told the exact string (see `DocumentsService.contentUrl`)
+ * and drops those spans, which keeps both selections and quote anchors clean.
+ * That is a patch over the real fix: the mark belongs in vector outlines, where
+ * it cannot be extracted as text at all. Doing that needs a glyph-outline
+ * pipeline pdf-lib does not provide, so it is deliberately deferred — but until
+ * it lands, any *other* consumer of these renditions inherits the problem.
  */
 @Injectable()
 export class WatermarkService {
@@ -32,9 +45,32 @@ export class WatermarkService {
     private readonly storage: StorageService,
   ) {}
 
+  /**
+   * The mark as it is stamped. Public because the viewer needs the exact string
+   * to keep it out of text selections — see `DocumentsService.contentUrl`.
+   */
+  textFor(room: Room, viewer: Viewer): string {
+    return this.text(room, viewer);
+  }
+
+  /**
+   * The default mark names the *company*, not the person.
+   *
+   * A page that leaves the room leaves as an organisation's copy — which is
+   * the unit a discloser acts on when something turns up where it shouldn't —
+   * and a reader's own email tiled across every page of a 600-page report is
+   * a lot of personal data to burn into a file that then gets forwarded
+   * internally. The person is still recorded: every open writes a
+   * `document.viewed` audit event against the participant, and the rendition
+   * row keeps the copy they were served.
+   *
+   * `{name}` and `{email}` still resolve, so a room that deliberately wants a
+   * per-reader mark sets `watermarkTemplate` and gets one.
+   */
   private text(room: Room, viewer: Viewer): string {
-    const template = room.watermarkTemplate ?? '{name} · {email} · {date}';
+    const template = room.watermarkTemplate ?? '{company} · {date}';
     return template
+      .replaceAll('{company}', viewer.company ?? room.name)
       .replaceAll('{name}', viewer.name ?? viewer.email)
       .replaceAll('{email}', viewer.email)
       .replaceAll('{date}', new Date().toISOString().slice(0, 10))

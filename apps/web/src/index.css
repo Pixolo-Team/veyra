@@ -1,0 +1,487 @@
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* antd paints the canvas; this keeps the area behind a short page from
+   flashing white in dark mode before the theme mounts. */
+body {
+  background: var(--veyra-bg-canvas, #eef0f4);
+}
+
+/* Router pending bar. A determinate progress bar would be a lie — we don't
+   know how long a route load takes. */
+@keyframes veyra-indeterminate {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(1); transform-origin: left; }
+  51% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes veyra-indeterminate {
+    0%, 100% { transform: scaleX(1); opacity: 0.4; }
+  }
+}
+
+/* Two layouts that need a breakpoint, which inline styles can't express.
+   Everything else stays in the components with the tokens. */
+
+.veyra-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* One column before the side panel starts squeezing the form it explains. */
+@media (max-width: 1000px) {
+  .veyra-two-col {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.veyra-invite-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 150px 36px;
+  gap: 8px;
+  align-items: start;
+}
+
+/* Below this the four columns can't hold an email address, so the row wraps:
+   email full width, then company + role + remove underneath. */
+@media (max-width: 720px) {
+  .veyra-invite-row {
+    grid-template-columns: minmax(0, 1fr) 130px 36px;
+  }
+  .veyra-invite-row > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Signed-out frame: brand panel inset from the page edge, then the form
+   column. Base rules first — the media query below overrides them, and
+   same-specificity rules are decided by source order. */
+.veyra-auth-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.veyra-auth-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 40px;
+  margin: 16px 0 16px 16px;
+  border-radius: 28px;
+}
+
+@media (max-width: 960px) {
+  .veyra-auth-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .veyra-auth-panel {
+    display: none;
+  }
+}
+
+/* Dossier: two fixed panels filling the space under the header, each with its
+   own scrollbar — a file tree that scrolls the whole page loses its header the
+   moment the dossier is large enough to matter. */
+.veyra-tree-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+}
+
+/* Each pane scrolls inside itself, so the page never scrolls as a whole and a
+   long dossier can't carry the header off the screen. */
+.veyra-tree-layout > * {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* The tree pane opts out: it scrolls its own list under a toolbar that stays. */
+.veyra-tree-layout > aside {
+  overflow: hidden;
+}
+
+/* Three panes don't fit a laptop. Tree (320) plus rail (340) leaves the page
+   about 300px inside the shell at 1280 — a thumbnail, not something you can
+   read. While a document is open and the window is that narrow, the tree gives
+   up its column: the reader is looking at one leaf, and the tree comes back the
+   moment they close it. */
+@media (max-width: 1280px) {
+  .veyra-tree-layout--reading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .veyra-tree-layout--reading > aside {
+    display: none;
+  }
+}
+
+/* Below this the panels stack and the page scrolls as one. */
+@media (max-width: 900px) {
+  .veyra-tree-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow-y: auto;
+  }
+  .veyra-tree-layout > * {
+    overflow-y: visible;
+  }
+}
+
+/* The per-row verbs — add, and the row's own actions — are noise on every row
+   at rest. */
+.veyra-tree-action {
+  opacity: 0;
+}
+
+/* Also while its popover is open — the pointer has left the row by then, and
+   a button that vanishes under its own menu reads as a glitch. The state is
+   already on the button for screen readers, so no extra class is needed. */
+.veyra-tree-row:hover .veyra-tree-action,
+.veyra-tree-action:focus-visible,
+.veyra-tree-action[aria-expanded='true'] {
+  opacity: 1;
+}
+
+/* Popover options behave like menu rows — a bare button gives no hover cue. */
+.veyra-add-option:hover,
+.veyra-add-option:focus-visible {
+  background: var(--ant-control-item-bg-hover, rgba(127, 127, 127, 0.12));
+}
+
+/* Rows in the file list.
+
+   A row mid-rename is the one thing on the page being acted on, so it takes
+   the same ground and the same margin accent a selected row carries in the
+   tree — one vocabulary for "this one", wherever you are standing.
+
+   `!important` because antd injects the table's own row rules at runtime, and
+   an equal-specificity rule in this file may or may not land after them; the
+   alternative is a selector written to out-specify a version of antd. The
+   custom properties are published by NodeDetail, so this stays theme-agnostic. */
+.ant-table-wrapper .ant-table-tbody > tr.veyra-file-row--active > td {
+  background: var(--veyra-file-active) !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr.veyra-file-row--active > td:first-child {
+  box-shadow: inset 3px 0 0 var(--veyra-file-accent);
+}
+
+/* Sidebar rows. Hover needs a selector, which inline styles can't express —
+   but the colour is a theme token, so the rail publishes it as a custom
+   property and this rule stays theme-agnostic. */
+.veyra-rail-row:hover,
+.veyra-rail-row:focus-visible {
+  background: var(--veyra-rail-hover);
+}
+
+/* The active row keeps its own ground on hover — its fill is already lighter
+   than the hover tint, so sharing the rule would make it dim on approach. */
+.veyra-rail-row[aria-current='page']:hover {
+  background: var(--veyra-rail-active);
+}
+
+/* pdf.js text layer.
+   A PDF page rasterises to pixels with no notion of words, so pdf.js re-lays
+   the extracted text as invisible positioned spans over the image — that layer
+   is what the browser's selection runs across, and what makes a highlight a
+   quote rather than a screenshot region. These are the rules pdf.js's own
+   output depends on, trimmed to what we use. */
+.textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  /* Above the highlight fills, which is what lets a drag start on a passage
+     that is already marked. The fills are inert and PdfPage hit-tests clicks
+     against the anchors instead — see the note at the top of that file. */
+  z-index: 2;
+  --total-scale-factor: 1;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+  /* pdf.js sizes the layer with `round(down, …, var(--scale-round-x))`. Left
+     undefined the whole declaration is invalid and silently dropped, and the
+     layer falls back to whatever `inset` gives it — which is right until a
+     page's raster and its box disagree by a fraction of a pixel. */
+  --scale-round-x: 1px;
+  --scale-round-y: 1px;
+}
+
+.textLayer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+
+/* pdf.js writes --font-height, --scale-x and --rotate onto each span; without
+   this rule they are inert and every line renders at the same size at 0,0. */
+.textLayer > :not(.markedContent),
+.textLayer .markedContent span:not(.markedContent) {
+  --font-height: 0;
+  --scale-x: 1;
+  --rotate: 0deg;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+
+.textLayer .markedContent {
+  display: contents;
+}
+
+/* The selection has to be visible against the page it sits on. */
+.textLayer ::selection {
+  background: rgba(26, 86, 219, 0.28);
+}
+
+/* A highlight under the cursor is clickable, but the thing physically under
+   the cursor is pdf.js's text layer, which puts a caret on every span. The
+   page sets `data-hit` while its hit-test says a highlight is there. */
+.veyra-pdf-page[data-hit='1'],
+.veyra-pdf-page[data-hit='1'] .textLayer :is(span, br) {
+  cursor: pointer;
+}
+
+/* Reachable by keyboard and screen reader, absent to everyone else.
+   `display: none` would take it out of the focus order too. */
+.veyra-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The way out of a document: the cross carries it, the word confirms it. Set
+   below the body size so it reads as chrome rather than as another action of
+   the same weight as Download. The colours come in as custom properties from
+   the component, which is where the theme's tokens are. */
+.veyra-viewer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--veyra-close-bg);
+  box-shadow: inset 0 0 0 1px var(--veyra-close-ring);
+  color: var(--veyra-close-fg);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.veyra-viewer-close:hover {
+  background: var(--veyra-close-hover-bg);
+  color: var(--veyra-close-hover-fg);
+}
+
+/* Highlighter bar ─────────────────────────────────────────────────────────
+   The three inks. Sized here rather than inline so hover and focus have
+   somewhere to live; the fill itself comes from the component. */
+.veyra-ink-dot {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.veyra-ink-dot:hover {
+  transform: scale(1.12);
+}
+
+.veyra-ink-dot:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Icon and word together, with a shape that appears under the cursor. A bare
+   text label in a floating bar reads as a caption, not as something to press. */
+.veyra-menu-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  color: var(--veyra-action-fg);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.veyra-menu-action:hover {
+  background: var(--veyra-action-hover-bg);
+}
+
+/* Comment boxes ───────────────────────────────────────────────────────────
+   A reply is a note in a margin, not a form field. The box is a tint of the
+   card it sits on with a hairline that only firms up on focus — a full-weight
+   input border turns every open thread into a piece of paperwork. */
+.veyra-comment-box .ant-input,
+.veyra-comment-box.ant-input {
+  border-color: var(--veyra-box-border);
+  background: var(--veyra-box-bg);
+  box-shadow: none;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+.veyra-comment-box .ant-input:hover,
+.veyra-comment-box.ant-input:hover {
+  border-color: var(--veyra-box-border-hover);
+  background: var(--veyra-box-bg);
+}
+
+.veyra-comment-box .ant-input:focus,
+.veyra-comment-box .ant-input-focused,
+.veyra-comment-box.ant-input:focus,
+.veyra-comment-box.ant-input-focused {
+  border-color: var(--veyra-box-border-focus);
+  background: var(--veyra-box-bg-focus);
+  /* No glow ring: the border darkening is enough to say where the cursor is,
+     and a halo inside a 340px rail is most of the rail. */
+  box-shadow: none;
+}
+
+/* Audit log table ─────────────────────────────────────────────────────────
+   `separate` rather than `collapse`, because a collapsed table drops the
+   borders of a sticky header as it detaches — the row lines below it would
+   scroll up over the header edge. The hairlines are drawn per cell instead. */
+.veyra-log {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.veyra-log-row {
+  transition: background 100ms ease;
+}
+
+.veyra-log-row:hover {
+  background: var(--veyra-row-hover);
+}
+
+/* One switch, not four buttons. Sized here so hover and the pressed state
+   have somewhere to live; the ground comes from the component. */
+.veyra-window-option {
+  height: 24px;
+  padding: 0 10px;
+  border: none;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.veyra-window-option:hover[aria-pressed='false'] {
+  color: var(--veyra-close-hover-fg, inherit);
+}
+
+.veyra-menu-action:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* Pager steps and page numbers — a compact row of targets, no borders. */
+.veyra-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.veyra-page:hover:not(:disabled):not([aria-current='page']) {
+  background: var(--veyra-page-hover);
+}
+
+.veyra-page:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+
+/* Onboarding frame: form column, then the preview panel inset from the right
+   edge — the signed-out split mirrored, so the panel sits on the side you read
+   towards. Base rules first; the media query below overrides them. */
+.veyra-onboard-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  min-height: 100dvh;
+}
+
+.veyra-onboard-aside {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+  margin: 16px 16px 16px 0;
+  padding: 48px;
+  border-radius: 28px;
+}
+
+/* Below this the preview would be narrower than the form it illustrates, so
+   it steps aside rather than squeezing both. */
+@media (max-width: 1080px) {
+  .veyra-onboard-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .veyra-onboard-aside {
+    display: none;
+  }
+}

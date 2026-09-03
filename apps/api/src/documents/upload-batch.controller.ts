@@ -12,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   type CreateUploadBatchRequest,
   createUploadBatchRequestSchema,
+  MAX_UPLOAD_BYTES,
   type UploadBatchDto,
   uploadBatchFileFieldsSchema,
 } from '@veyra/contracts';
@@ -20,7 +21,7 @@ import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { UploadBatchService } from './upload-batch.service';
 
 type Authed = NonNullable<AuthedRequest['user']>;
-const MAX_FILE_BYTES = 250 * 1024 * 1024;
+const MAX_FILE_BYTES = MAX_UPLOAD_BYTES;
 type UploadedMulterFile = { originalname: string; mimetype: string; buffer: Buffer };
 
 @Controller()

@@ -56,7 +56,7 @@ export class OverviewService {
       }),
       this.prisma.auditEvent.findMany({
         where: { roomId },
-        include: { actorUser: true, actorParticipant: true },
+        include: { actorUser: true, actorParticipant: { include: { company: true } } },
         orderBy: { createdAt: 'desc' },
         take: 15,
       }),
@@ -106,7 +106,7 @@ export class OverviewService {
         documentsViewedLast7d: viewedDocs.size,
         lastViewedAt: lastView?.toISOString() ?? null,
       },
-      recentActivity: recent.map(toActivityEvent),
+      recentActivity: recent.map((event) => toActivityEvent(event)),
     };
   }
 }

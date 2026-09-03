@@ -47,7 +47,7 @@ export class ThreadsService {
     documentVersionId: string,
     input: CreateThreadRequest,
   ): Promise<ThreadDto> {
-    const ctx = await this.access.forVersion(userId, documentVersionId);
+    const ctx = await this.access.forVersionWrite(userId, documentVersionId);
 
     if (input.annotationId) {
       const annotation = await this.prisma.annotation.findFirst({
@@ -140,7 +140,7 @@ export class ThreadsService {
   ): Promise<ThreadDto> {
     const thread = await this.loadVisible(userId, threadId);
     const participant = await this.access
-      .forVersion(userId, thread.documentVersionId)
+      .forVersionWrite(userId, thread.documentVersionId)
       .then((c) => c.participant);
 
     const data: Prisma.CommentThreadUpdateInput = {};
@@ -179,7 +179,7 @@ export class ThreadsService {
   ): Promise<ThreadDto> {
     const thread = await this.loadVisible(userId, threadId);
     const participant = await this.access
-      .forVersion(userId, thread.documentVersionId)
+      .forVersionWrite(userId, thread.documentVersionId)
       .then((c) => c.participant);
     const mentions = await this.validateMentions(thread.roomId, input.mentions);
 
@@ -209,7 +209,7 @@ export class ThreadsService {
     });
     if (!comment || comment.deletedAt) throw new NotFoundException('Comment not found');
     const participant = await this.access
-      .forVersion(userId, comment.thread.documentVersionId)
+      .forVersionWrite(userId, comment.thread.documentVersionId)
       .then((c) => c.participant);
     if (comment.authorParticipantId !== participant.id) {
       throw new ForbiddenException('You can only edit your own comments');
@@ -229,7 +229,7 @@ export class ThreadsService {
     });
     if (!comment || comment.deletedAt) throw new NotFoundException('Comment not found');
     const participant = await this.access
-      .forVersion(userId, comment.thread.documentVersionId)
+      .forVersionWrite(userId, comment.thread.documentVersionId)
       .then((c) => c.participant);
     if (comment.authorParticipantId !== participant.id && participant.role !== 'admin') {
       throw new ForbiddenException('Only the author or a room admin can delete this comment');

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import {
   type AcceptNdaRequest,
   acceptNdaRequestSchema,
@@ -7,6 +7,8 @@ import {
   type ParticipantGroup,
   type RoomDetail,
   type RoomListItem,
+  type UpdateRoomStatusRequest,
+  updateRoomStatusRequestSchema,
 } from '@veyra/contracts';
 import { type AuthedRequest, CurrentUser } from '../auth/auth.decorators';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
@@ -42,6 +44,15 @@ export class RoomsController {
     @Param('roomId') roomId: string,
   ): Promise<ParticipantGroup[]> {
     return this.rooms.listParticipants(user.id, roomId);
+  }
+
+  @Patch(':roomId/status')
+  setStatus(
+    @CurrentUser() user: Authed,
+    @Param('roomId') roomId: string,
+    @Body(new ZodValidationPipe(updateRoomStatusRequestSchema)) body: UpdateRoomStatusRequest,
+  ): Promise<RoomDetail> {
+    return this.rooms.setStatus(user.id, roomId, body.status);
   }
 
   @Post(':roomId/accept-nda')

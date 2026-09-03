@@ -4,7 +4,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { DocumentDetail, MoveDocumentRequest } from '@veyra/contracts';
+import type {
+  DocumentDetail,
+  MoveDocumentRequest,
+  RecordViewRequest,
+} from '@veyra/contracts';
+
+/**
+ * The longest single sitting the log will believe.
+ *
+ * A browser reports the time between opening a document and leaving it, which
+ * includes the hours a tab spent behind other windows. Eight hours is already
+ * generous for one document; past that the number says more about the tab than
+ * the reader.
+ */
+const MAX_READ_SECONDS = 8 * 60 * 60;
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RoomAccessService } from '../rooms/room-access.service';
@@ -31,7 +45,7 @@ export class DocumentsService {
   ) {}
 
   async upload(userId: string, roomId: string, input: UploadInput): Promise<DocumentDetail> {
-    await this.access.requireRole(userId, roomId, 'contributor');
+    await this.access.requireWriteRole(userId, roomId, 'contributor');
 
     const roomModule = await this.prisma.roomModule.findFirst({
       where: { id: input.roomModuleId, roomId },
@@ -132,7 +146,10 @@ export class DocumentsService {
 
   /** A short-TTL URL the viewer can GET. Watermarked renditions (D9) are a later
    *  layer — for now this serves the rendered PDF (or the original). */
-  async contentUrl(userId: string, versionId: string): Promise<{ url: string; expiresInSeconds: number }> {
+  async contentUrl(
+    userId: string,
+    versionId: string,
+  ): Promise<{ url: string; expiresInSeconds: number; watermark: string | null }> {
     const version = await this.prisma.documentVersion.findUnique({
       where: { id: versionId },
       include: { document: { include: { room: true } } },
@@ -142,13 +159,20 @@ export class DocumentsService {
     const room = version.document.room;
 
     let key: string;
+    let watermark: string | null = null;
     if (room.watermarkEnabled && version.mimeType === 'application/pdf' && version.renderStatus === 'ready') {
       const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
-      key = await this.watermark.keyFor(version, room, {
-        participant,
-        name: user.name,
-        email: user.email,
+      // The mark names the company the reader is here on behalf of, not the
+      // reader — see WatermarkService.text.
+      const company = await this.prisma.company.findUnique({
+        where: { id: participant.companyId },
+        select: { name: true },
       });
+      const viewer = { participant, name: user.name, email: user.email, company: company?.name ?? null };
+      key = await this.watermark.keyFor(version, room, viewer);
+      // The mark is stamped as real text, so it is extractable — the viewer
+      // needs the string to keep it out of selections and quote anchors.
+      watermark = this.watermark.textFor(room, viewer);
     } else {
       key = version.renderedPdfKey ?? version.storageKey;
     }
@@ -162,6 +186,7 @@ export class DocumentsService {
       targetId: version.document.id,
     });
     return {
+      watermark,
       url: await this.storage.getSignedUrl(key),
       expiresInSeconds: STORAGE_SIGNED_URL_TTL_SECONDS,
     };
@@ -169,6 +194,43 @@ export class DocumentsService {
 
   /** Download the *original* file — gated by the room toggle (D8) and the
    *  participant's download capability. */
+  /**
+   * Records how long a reader had a document open.
+   *
+   * Separate from `document.viewed`, which fires when the file is opened: the
+   * pair is what turns "they looked at it" into "they read it for four
+   * minutes", which is the question a data room is usually asked. The reader's
+   * own clock is the only one that knows, so the number arrives from the
+   * browser and is bounded here rather than trusted — a tab left open all
+   * weekend is not three days of reading, and nor is a hostile client's
+   * arithmetic.
+   */
+  async recordView(
+    userId: string,
+    versionId: string,
+    input: RecordViewRequest,
+  ): Promise<void> {
+    const version = await this.prisma.documentVersion.findUnique({
+      where: { id: versionId },
+      include: { document: true },
+    });
+    if (!version || version.document.deletedAt) throw new NotFoundException('Version not found');
+    const participant = await this.access.requireParticipant(userId, version.document.roomId);
+
+    await this.audit.record({
+      action: 'document.read',
+      roomId: version.document.roomId,
+      actorParticipantId: participant.id,
+      targetType: 'document',
+      targetId: version.document.id,
+      metadata: {
+        seconds: Math.min(input.seconds, MAX_READ_SECONDS),
+        versionId,
+        ...(input.pagesRead ? { pagesRead: input.pagesRead } : {}),
+      },
+    });
+  }
+
   async downloadUrl(userId: string, versionId: string): Promise<{ url: string; expiresInSeconds: number }> {
     const version = await this.prisma.documentVersion.findUnique({
       where: { id: versionId },
@@ -205,7 +267,12 @@ export class DocumentsService {
       where: { id: documentId, deletedAt: null },
     });
     if (!document) throw new NotFoundException('Document not found');
-    await this.access.requireRole(userId, document.roomId, min);
+    // 'reviewer' is only ever the read path; 'contributor' means a mutation follows.
+    if (min === 'contributor') {
+      await this.access.requireWriteRole(userId, document.roomId, min);
+    } else {
+      await this.access.requireRole(userId, document.roomId, min);
+    }
     return document;
   }
 }

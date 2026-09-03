@@ -9,6 +9,7 @@
 import { randomBytes } from 'node:crypto';
 import * as argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client';
+import { COMPANY_DOMAIN, COMPANY_NAME, ensureDiscloserCompany } from './dev-company';
 
 const prisma = new PrismaClient();
 
@@ -33,38 +34,26 @@ async function main(): Promise<void> {
     },
   });
 
-  const operatorEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@veyra-pharma.example';
+  const operatorEmail = process.env.SEED_ADMIN_EMAIL ?? `admin@${COMPANY_DOMAIN}`;
   const oneTimePassword = process.env.SEED_ADMIN_OTP ?? randomBytes(9).toString('base64url');
 
-  const company = await prisma.company.upsert({
-    where: { id: 'seed-company-veyra-pharma' },
-    update: {},
-    create: {
-      id: 'seed-company-veyra-pharma',
-      name: 'Veyra Pharma',
-      legalName: 'Veyra Pharma Ltd.',
-      primaryDomain: 'veyra-pharma.example',
-      domains: { create: [{ domain: 'veyra-pharma.example', verified: true }] },
-      tenant: { create: { plan: 'pilot', status: 'active' } },
-    },
-    include: { tenant: true },
-  });
+  const { tenant } = await ensureDiscloserCompany(prisma);
 
   const user = await prisma.user.upsert({
     where: { email: operatorEmail },
     update: {},
     create: {
       email: operatorEmail,
-      name: 'Veyra Pharma Admin',
+      name: `${COMPANY_NAME} Admin`,
       status: 'invited', // forced reset until they set a real password (D11)
       passwordHash: await argon2.hash(oneTimePassword, { type: argon2.argon2id }),
     },
   });
 
   await prisma.tenantMember.upsert({
-    where: { tenantId_userId: { tenantId: company.tenant!.id, userId: user.id } },
+    where: { tenantId_userId: { tenantId: tenant.id, userId: user.id } },
     update: {},
-    create: { tenantId: company.tenant!.id, userId: user.id, role: 'owner' },
+    create: { tenantId: tenant.id, userId: user.id, role: 'owner' },
   });
 
   console.log('Seeded CTD template + first admin.');

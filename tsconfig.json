@@ -1,8 +1,17 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/contracts" },
-    { "path": "./packages/design-system" },
-    { "path": "./apps/playground" }
+    {
+      "path": "./packages/contracts"
+    },
+    {
+      "path": "./packages/design-system"
+    },
+    {
+      "path": "./apps/playground"
+    },
+    {
+      "path": "./apps/web"
+    }
   ]
 }

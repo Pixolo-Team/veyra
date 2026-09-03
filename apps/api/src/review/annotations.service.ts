@@ -18,7 +18,7 @@ export class AnnotationsService {
     documentVersionId: string,
     input: CreateAnnotationRequest,
   ): Promise<AnnotationDto> {
-    const ctx = await this.access.forVersion(userId, documentVersionId);
+    const ctx = await this.access.forVersionWrite(userId, documentVersionId);
     const annotation = await this.prisma.annotation.create({
       data: {
         roomId: ctx.roomId,
@@ -72,7 +72,7 @@ export class AnnotationsService {
     });
     if (!annotation || annotation.deletedAt) throw new NotFoundException('Annotation not found');
     const participant = await this.access
-      .forVersion(userId, annotation.documentVersionId)
+      .forVersionWrite(userId, annotation.documentVersionId)
       .then((c) => c.participant);
     if (annotation.authorParticipantId !== participant.id && participant.role !== 'admin') {
       throw new ForbiddenException('Only the author or a room admin can delete this highlight');

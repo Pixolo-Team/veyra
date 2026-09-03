@@ -15,18 +15,26 @@ export type ColorRamp = readonly [
   string, string, string, string, string,
 ];
 
-/** Veyra brand indigo. Base = `veyra[5]`. */
+/**
+ * Veyra brand blue. Base = `veyra[5]` = the colour of the wave in the logo
+ * mark, so the mark and the UI are one brand rather than two blues.
+ *
+ * Anchored at #1a56db (hsl 221 79% 48%) and stepped through lightness at a
+ * near-constant hue. Every text pairing the system relies on clears WCAG AA
+ * with room to spare — see Foundations → Contrast, which measures the resolved
+ * antd tokens rather than these seeds.
+ */
 export const veyra: ColorRamp = [
-  '#f0f2ff',
-  '#dbe0ff',
-  '#b8c1ff',
-  '#8e9bff',
-  '#6a78fa',
-  '#4c5ce8', // base
-  '#3a49c4',
-  '#2b379e',
-  '#1e2778',
-  '#141a52',
+  '#f0f4ff',
+  '#dce7fe',
+  '#bacffd',
+  '#8eb0fb',
+  '#4c81f6',
+  '#1a56db', // base — the logo mark
+  '#1546b2',
+  '#123a91',
+  '#0f2e70',
+  '#0b1f4c',
 ] as const;
 
 /** Neutral greys. Text, borders, surfaces and dividers all derive from here. */

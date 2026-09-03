@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DeleteOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteIcon, PlusIcon, UploadIcon } from '../icons';
 
 import { Button, type ButtonIntent } from './Button';
 import { Stack } from './Stack';
@@ -69,10 +69,10 @@ export const Sizes: Story = {
 export const WithIcons: Story = {
   render: ({ children: _children, ...args }) => (
     <Stack direction="horizontal" gap="md" wrap>
-      <Button {...args} intent="primary" icon={<PlusOutlined />}>New project</Button>
-      <Button {...args} intent="secondary" icon={<DownloadOutlined />}>Export</Button>
-      <Button {...args} intent="danger" icon={<DeleteOutlined />}>Delete</Button>
-      <Button {...args} intent="ghost" icon={<PlusOutlined />} aria-label="Add" />
+      <Button {...args} intent="primary" icon={<PlusIcon />}>New project</Button>
+      <Button {...args} intent="secondary" icon={<UploadIcon />}>Export</Button>
+      <Button {...args} intent="danger" icon={<DeleteIcon />}>Delete</Button>
+      <Button {...args} intent="ghost" icon={<PlusIcon />} aria-label="Add" />
     </Stack>
   ),
 };

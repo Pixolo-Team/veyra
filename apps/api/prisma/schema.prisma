@@ -60,6 +60,7 @@ enum RoomStatus {
   draft
   active
   closed
+  archived
 }
 
 enum CapabilityScope {

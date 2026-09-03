@@ -29,6 +29,24 @@ export const inviteParticipantRequestSchema = z.object({
 });
 export type InviteParticipantRequest = z.infer<typeof inviteParticipantRequestSchema>;
 
+/**
+ * A room moves through draft → active → closed, and can be archived from any
+ * of them. `archived` is a filing state, not a deletion: the room stays
+ * readable and can be restored to `closed`.
+ */
+export const ROOM_STATUS_TRANSITIONS: Record<
+  z.infer<typeof roomStatusSchema>,
+  readonly z.infer<typeof roomStatusSchema>[]
+> = {
+  draft: ['active', 'archived'],
+  active: ['closed', 'archived'],
+  closed: ['active', 'archived'],
+  archived: ['closed'],
+};
+
+export const updateRoomStatusRequestSchema = z.object({ status: roomStatusSchema });
+export type UpdateRoomStatusRequest = z.infer<typeof updateRoomStatusRequestSchema>;
+
 export const acceptNdaRequestSchema = z.object({ ndaAccepted: z.literal(true) });
 export type AcceptNdaRequest = z.infer<typeof acceptNdaRequestSchema>;
 

@@ -17,6 +17,7 @@ export class ReviewAccess {
     private readonly rooms: RoomAccessService,
   ) {}
 
+  /** Read path: participation is enough. */
   async forVersion(userId: string, documentVersionId: string): Promise<VersionContext> {
     const version = await this.prisma.documentVersion.findUnique({
       where: { id: documentVersionId },
@@ -25,6 +26,13 @@ export class ReviewAccess {
     if (!version || version.document.deletedAt) throw new NotFoundException('Document version not found');
     const participant = await this.rooms.requireParticipant(userId, version.document.roomId);
     return { documentVersionId, roomId: version.document.roomId, participant };
+  }
+
+  /** Write path: same, plus the room has to still accept changes (not archived). */
+  async forVersionWrite(userId: string, documentVersionId: string): Promise<VersionContext> {
+    const ctx = await this.forVersion(userId, documentVersionId);
+    await this.rooms.requireWritableRoom(ctx.roomId);
+    return ctx;
   }
 
   /** D5: a `side` thread is visible only to the creator's own side; `room` to all. */

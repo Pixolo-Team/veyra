@@ -2,6 +2,14 @@ import { z } from 'zod';
 import { idSchema } from './common';
 import { moduleSectionSchema, renderStatusSchema, uploadBatchStatusSchema } from './enums';
 
+/**
+ * Per-file upload ceiling (mvp-plan §2). It lives here because two sides need
+ * it and they must not drift: the API rejects above it, and the drop zone
+ * quotes it — a UI promising a limit the server won't honour is worse than no
+ * limit at all.
+ */
+export const MAX_UPLOAD_BYTES = 250 * 1024 * 1024;
+
 export const documentVersionSchema = z.object({
   id: idSchema,
   versionNo: z.number().int().positive(),
@@ -128,3 +136,19 @@ export const uploadBatchSchema = z.object({
   files: z.array(uploadBatchFileSchema),
 });
 export type UploadBatchDto = z.infer<typeof uploadBatchSchema>;
+
+/**
+ * How long a document was actually open.
+ *
+ * Sent when the reader leaves, not while they read: a heartbeat every few
+ * seconds would put a row in an append-only audit log for every few seconds
+ * of reading, and an auditor scrolling a year of that would never reach the
+ * download that mattered. `seconds` is capped server-side, because a tab left
+ * open over a weekend is not three days of reading.
+ */
+export const recordViewRequestSchema = z.object({
+  seconds: z.number().int().min(1).max(86_400),
+  /** The furthest page reached, when the reader got past the first. */
+  pagesRead: z.number().int().min(1).max(100_000).optional(),
+});
+export type RecordViewRequest = z.infer<typeof recordViewRequestSchema>;

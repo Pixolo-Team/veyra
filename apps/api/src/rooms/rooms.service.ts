@@ -1,10 +1,12 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma, User } from '@prisma/client';
+import { ROOM_STATUS_TRANSITIONS } from '@veyra/contracts';
 import type {
   CreateRoomRequest,
   ParticipantGroup,
   RoomDetail,
   RoomListItem,
+  RoomStatus,
 } from '@veyra/contracts';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -174,6 +176,39 @@ export class RoomsService {
     });
 
     return this.getForUser(user.id, roomId);
+  }
+
+  /**
+   * Moves a room along its lifecycle. Admin only, and only along a transition
+   * the state machine allows — an arbitrary status write would let a closed
+   * room quietly reopen without anyone seeing it happen, which is exactly the
+   * kind of thing the audit log exists to catch.
+   */
+  async setStatus(userId: string, roomId: string, next: RoomStatus): Promise<RoomDetail> {
+    await this.access.requireRole(userId, roomId, 'admin');
+
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Room not found');
+    if (room.status === next) return this.getForUser(userId, roomId);
+
+    const allowed = ROOM_STATUS_TRANSITIONS[room.status];
+    if (!allowed.includes(next)) {
+      throw new BadRequestException(
+        `This room is ${room.status} and cannot become ${next} (allowed: ${allowed.join(', ') || 'nothing'})`,
+      );
+    }
+
+    await this.prisma.room.update({ where: { id: roomId }, data: { status: next } });
+    await this.audit.record({
+      action: 'room.status_changed',
+      roomId,
+      actorUserId: userId,
+      targetType: 'room',
+      targetId: roomId,
+      metadata: { from: room.status, to: next },
+    });
+
+    return this.getForUser(userId, roomId);
   }
 
   /** Groups screen — people by company, each side together (mvp-plan §6). */

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { CreateFolderRequest } from '@veyra/contracts';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,8 +17,39 @@ export class FoldersService {
     private readonly audit: AuditService,
   ) {}
 
+  /**
+   * Two folders with the same name in the same place are indistinguishable in
+   * the tree and make a dossier path ambiguous — so the name has to be unique
+   * among its siblings.
+   *
+   * Case-insensitive: "Stability" and "stability" side by side is a mistake
+   * every time, not a distinction anyone means to draw.
+   */
+  private async assertNameFree(
+    roomId: string,
+    roomModuleId: string,
+    parentFolderId: string | null,
+    name: string,
+    exceptFolderId?: string,
+  ): Promise<void> {
+    const clash = await this.prisma.folder.findFirst({
+      where: {
+        roomId,
+        roomModuleId,
+        parentFolderId,
+        deletedAt: null,
+        name: { equals: name, mode: 'insensitive' },
+        ...(exceptFolderId ? { id: { not: exceptFolderId } } : {}),
+      },
+      select: { id: true },
+    });
+    if (clash) {
+      throw new ConflictException(`A folder called "${name}" is already here`);
+    }
+  }
+
   async create(userId: string, roomId: string, input: CreateFolderRequest): Promise<{ id: string }> {
-    await this.access.requireRole(userId, roomId, 'contributor');
+    await this.access.requireWriteRole(userId, roomId, 'contributor');
 
     const roomModule = await this.prisma.roomModule.findFirst({
       where: { id: input.roomModuleId, roomId },
@@ -28,6 +64,8 @@ export class FoldersService {
       if (!parent) throw new BadRequestException('Parent folder not found in this module');
       parentPath = parent.path;
     }
+
+    await this.assertNameFree(roomId, roomModule.id, input.parentFolderId ?? null, input.name);
 
     const folder = await this.prisma.folder.create({
       data: {
@@ -51,6 +89,13 @@ export class FoldersService {
 
   async rename(userId: string, folderId: string, name: string): Promise<void> {
     const folder = await this.load(userId, folderId, 'contributor');
+    await this.assertNameFree(
+      folder.roomId,
+      folder.roomModuleId,
+      folder.parentFolderId,
+      name,
+      folder.id,
+    );
     const newPath = folder.path.replace(/[^/]+\/$/, `${name}/`);
     await this.prisma.$transaction(async (tx) => {
       await tx.folder.update({ where: { id: folder.id }, data: { name, path: newPath } });
@@ -83,6 +128,14 @@ export class FoldersService {
       }
       parentPath = parent.path;
     }
+
+    await this.assertNameFree(
+      folder.roomId,
+      folder.roomModuleId,
+      parentFolderId,
+      folder.name,
+      folder.id,
+    );
     const newPath = `${parentPath}${folder.name}/`;
 
     await this.prisma.$transaction(async (tx) => {
@@ -142,8 +195,16 @@ export class FoldersService {
 
     for (const raw of segments) {
       const name = raw.trim().slice(0, 200) || 'untitled';
+      // Case-insensitive, to match `assertNameFree` — otherwise an upload of
+      // "stability" would sit beside an existing "Stability".
       const existing = await this.prisma.folder.findFirst({
-        where: { roomId, roomModuleId, parentFolderId: parentId, name, deletedAt: null },
+        where: {
+          roomId,
+          roomModuleId,
+          parentFolderId: parentId,
+          deletedAt: null,
+          name: { equals: name, mode: 'insensitive' },
+        },
       });
       const folder =
         existing ??
@@ -165,7 +226,7 @@ export class FoldersService {
   private async load(userId: string, folderId: string, min: 'contributor' | 'admin') {
     const folder = await this.prisma.folder.findFirst({ where: { id: folderId, deletedAt: null } });
     if (!folder) throw new NotFoundException('Folder not found');
-    await this.access.requireRole(userId, folder.roomId, min);
+    await this.access.requireWriteRole(userId, folder.roomId, min);
     return folder;
   }
 }

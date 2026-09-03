@@ -67,9 +67,19 @@ export class AuthController {
     res.clearCookie(this.cookieName, this.cookieBase);
   }
 
+  /**
+   * Who is signed in, or nobody.
+   *
+   * Public, and answers with `null` rather than 401. "Nobody is signed in" is
+   * the *answer* to this question, not a failure to answer it — and behind the
+   * guard it made every first paint of the app log a red 401 in the console,
+   * which trains everyone to ignore the console on a product whose whole job
+   * is keeping records.
+   */
+  @Public()
   @Get('me')
-  me(@CurrentUser() user: NonNullable<AuthedRequest['user']>): { user: SessionUser } {
-    return { user: AuthService.toSessionUser(user) };
+  me(@Req() req: AuthedRequest): { user: SessionUser | null } {
+    return { user: req.user ? AuthService.toSessionUser(req.user) : null };
   }
 
   @Post('set-password')

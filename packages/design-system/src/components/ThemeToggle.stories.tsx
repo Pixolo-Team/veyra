@@ -47,6 +47,21 @@ export const Playground: Story = {
 
 export const IconOnly: Story = { args: { iconOnly: true } };
 
+export const Compact: Story = {
+  args: { compact: true },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'One button that cycles light → dark → system. Still three states — it just ' +
+          'spends one slot instead of three, for headers where a segmented control ' +
+          'would dominate. The accessible name says both the current state and where ' +
+          'the next press goes, since an icon alone cannot.',
+      },
+    },
+  },
+};
+
 export const Sizes: Story = {
   render: (args) => (
     <Stack gap="md" align="flex-start">

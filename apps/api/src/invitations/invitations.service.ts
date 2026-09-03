@@ -58,7 +58,7 @@ export class InvitationsService {
     roomId: string,
     input: CreateInvitationRequest,
   ): Promise<InvitationDto> {
-    const caller = await this.roomAccess.requireRole(inviter.id, roomId, 'admin');
+    const caller = await this.roomAccess.requireWriteRole(inviter.id, roomId, 'admin');
     const room = await this.prisma.room.findUniqueOrThrow({ where: { id: roomId } });
 
     const token = newToken();

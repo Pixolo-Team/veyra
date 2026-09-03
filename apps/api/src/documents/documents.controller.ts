@@ -16,17 +16,19 @@ import {
   type DocumentDetail,
   type MoveDocumentRequest,
   moveDocumentRequestSchema,
+  type RecordViewRequest,
+  recordViewRequestSchema,
   type RenameRequest,
   renameRequestSchema,
   uploadDocumentFieldsSchema,
+  MAX_UPLOAD_BYTES,
 } from '@veyra/contracts';
 import { type AuthedRequest, CurrentUser } from '../auth/auth.decorators';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { DocumentsService } from './documents.service';
 
 type Authed = NonNullable<AuthedRequest['user']>;
-// mvp-plan §2: 250 MB per file.
-const MAX_FILE_BYTES = 250 * 1024 * 1024;
+const MAX_FILE_BYTES = MAX_UPLOAD_BYTES;
 type UploadedMulterFile = { originalname: string; mimetype: string; buffer: Buffer };
 
 function requireFile(file: UploadedMulterFile | undefined): UploadedMulterFile {
@@ -97,6 +99,21 @@ export class DocumentsController {
     @Param('versionId') versionId: string,
   ): Promise<{ url: string; expiresInSeconds: number }> {
     return this.documents.contentUrl(user.id, versionId);
+  }
+
+  /*
+   * `sendBeacon` from the viewer, so it survives the tab closing — which is
+   * exactly when this fires. A beacon cannot read a response, hence 204 and
+   * nothing to say.
+   */
+  @Post('document-versions/:versionId/read')
+  @HttpCode(204)
+  recordView(
+    @CurrentUser() user: Authed,
+    @Param('versionId') versionId: string,
+    @Body(new ZodValidationPipe(recordViewRequestSchema)) body: RecordViewRequest,
+  ): Promise<void> {
+    return this.documents.recordView(user.id, versionId, body);
   }
 
   @Get('document-versions/:versionId/download')

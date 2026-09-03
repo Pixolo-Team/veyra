@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { throttlerModule } from './common/throttler';
 import { AuditModule } from './audit/audit.module';
+import { DeniedAccessFilter } from './audit/denied-access.filter';
 import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { CompaniesModule } from './companies/companies.module';
@@ -42,6 +43,10 @@ import { StorageModule } from './storage/storage.module';
     HealthModule,
     JobsModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Refusals are the half of the log nothing else records — see the filter.
+    { provide: APP_FILTER, useClass: DeniedAccessFilter },
+  ],
 })
 export class AppModule {}

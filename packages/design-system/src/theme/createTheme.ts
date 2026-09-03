@@ -194,6 +194,17 @@ function componentTokens(colors: SemanticColors, shadows: ElevationScale, mode: 
       boxShadowTertiary: shadows.sm,
       colorBorderSecondary: colors.border,
     },
+    /*
+     * antd sizes a vertical form label to the *control* height — 40px at
+     * size="large" — around a 22px line, which leaves ~18px of dead air under
+     * every label. Pin the label box to its own line height so the gap between
+     * a label and its field is the 8px the spacing scale asks for, not 26px.
+     */
+    Form: {
+      labelHeight: Math.round(fontSize.md * lineHeight.normal),
+      verticalLabelPadding: `0 0 ${space.sm}px`,
+      itemMarginBottom: space.lg,
+    },
     Input: {
       paddingInline: space.md,
       activeShadow: `0 0 0 3px ${colors.brandSubtle}`,

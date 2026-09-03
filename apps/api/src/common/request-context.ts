@@ -5,6 +5,15 @@ export interface RequestContext {
   userId?: string;
   ip?: string;
   userAgent?: string;
+  /**
+   * The room this request turned out to be about.
+   *
+   * Filled in by the access checks rather than read off the route, because
+   * most room-scoped paths don't name the room: `/annotations/:id` reaches
+   * into one, and only the lookup that refuses knows which. Without this a
+   * refusal lands in the log with no room, and so appears in nobody's.
+   */
+  roomId?: string;
 }
 
 /**

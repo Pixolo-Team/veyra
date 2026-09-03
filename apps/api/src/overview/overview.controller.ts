@@ -4,6 +4,9 @@ import {
   type ActivityPage,
   type ActivityQuery,
   activityQuerySchema,
+  activityWindowSchema,
+  type ActivitySummary,
+  type ActivityWindow,
   type Overview,
 } from '@veyra/contracts';
 import { type AuthedRequest, CurrentUser } from '../auth/auth.decorators';
@@ -32,6 +35,15 @@ export class OverviewController {
     @Query(new ZodValidationPipe(activityQuerySchema)) query: ActivityQuery,
   ): Promise<ActivityPage> {
     return this.activity.list(user.id, roomId, query);
+  }
+
+  @Get('activity/summary')
+  summary(
+    @CurrentUser() user: Authed,
+    @Param('roomId') roomId: string,
+    @Query('days', new ZodValidationPipe(activityWindowSchema.default('7'))) days: ActivityWindow,
+  ): Promise<ActivitySummary> {
+    return this.activity.summary(user.id, roomId, days);
   }
 
   @Get('activity.csv')

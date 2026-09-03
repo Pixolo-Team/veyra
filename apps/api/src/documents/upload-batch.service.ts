@@ -69,6 +69,7 @@ export class UploadBatchService {
     file: IncomingFile,
   ): Promise<UploadBatchDto> {
     const batch = await this.loadBatch(userId, batchId);
+    await this.access.requireWritableRoom(batch.roomId);
     const cleanPath = relativePath.replace(/^\/+/, '');
     const row = await this.prisma.uploadBatchFile.findUnique({
       where: { batchId_relativePath: { batchId, relativePath: cleanPath } },
@@ -116,7 +117,8 @@ export class UploadBatchService {
   }
 
   async complete(userId: string, batchId: string): Promise<UploadBatchDto> {
-    await this.loadBatch(userId, batchId);
+    const batch = await this.loadBatch(userId, batchId);
+    await this.access.requireWritableRoom(batch.roomId);
     const counts = await this.prisma.uploadBatchFile.groupBy({
       by: ['status'],
       where: { batchId },
