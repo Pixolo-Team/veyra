@@ -2,9 +2,11 @@
  * The one place the app talks to the API.
  *
  * Every call is same-origin (`/api/...`) — the Vite dev server proxies to the
- * Nest app in development, and in production both are served from one origin.
- * That matters: the session is an httpOnly `SameSite=Lax` cookie, so it only
- * travels on same-origin requests and no token is ever readable from JS.
+ * Nest app in development, and in production a Vercel rewrite proxies to the
+ * Cloud Run service (`apps/web/vercel.json`). That matters: the session is an
+ * httpOnly `SameSite=Lax` cookie, so it only travels on same-origin requests
+ * and no token is ever readable from JS. Pointing this at the API's own origin
+ * instead would drop the cookie on every request and break sign-in.
  */
 
 export class ApiError extends Error {

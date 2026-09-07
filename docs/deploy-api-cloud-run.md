@@ -13,15 +13,31 @@ needed and the image is built natively for `linux/amd64`.
 
 ---
 
-## 0. Decide the project
+## Current deployment
 
-There is no `veyra` project on the account today, and the active gcloud config
-points at `evento-502713`, which is unrelated. Create or pick one first —
-everything below assumes `$PROJECT` and will otherwise deploy into whatever is
-currently active.
+| | |
+|---|---|
+| Service | `veyra-api` |
+| URL | https://veyra-api-695868445245.asia-south1.run.app |
+| Project | `evento-502713` (shared with the unrelated `evento-backend` service) |
+| Region | `asia-south1` |
+| Service account | `veyra-api@evento-502713.iam.gserviceaccount.com` |
+| Bucket | `gs://evento-502713-veyra-documents`, mounted at `/mnt/storage` |
+| Secrets | `VEYRA_DATABASE_URL`, `VEYRA_DIRECT_URL`, `VEYRA_SESSION_SECRET` |
+
+Veyra shares a project with `evento`, so every Veyra resource is name-prefixed.
+Billing and IAM are not separable this way — worth its own project before this
+handles real deal data.
+
+Redeploy with the command in §4. Everything in §0–§3 is one-time setup that has
+already been done.
+
+---
+
+## 0. Project setup (done)
 
 ```bash
-export PROJECT=veyra-prod
+export PROJECT=evento-502713
 export REGION=asia-south1
 gcloud config set project "$PROJECT"
 ```
@@ -62,32 +78,41 @@ gcloud storage buckets add-iam-policy-binding "gs://$PROJECT-documents" \
 
 ## 2. Secrets
 
-Create these yourself — they carry live credentials.
+Secret values are sourced from `apps/api/.env` and piped straight into Secret
+Manager, so they are never echoed to a terminal or stored in a shell history.
+`printf '%s'` matters: a trailing newline silently corrupts a connection string.
 
 ```bash
-gcloud secrets create DATABASE_URL   --replication-policy=automatic
-gcloud secrets create DIRECT_URL     --replication-policy=automatic
-gcloud secrets create SESSION_SECRET --replication-policy=automatic
+cd apps/api
+set -a; . ./.env; set +a
+for n in DATABASE_URL DIRECT_URL SESSION_SECRET; do
+  gcloud secrets create "VEYRA_$n" --replication-policy=automatic
+  printf '%s' "${!n}" | gcloud secrets versions add "VEYRA_$n" --data-file=-
+done
 ```
 
-Add a version to each (Supabase → Project Settings → Database for the first two;
-`openssl rand -hex 48` for the third, which the env schema requires to be at
-least 32 characters):
+They are prefixed `VEYRA_` because the project is shared with `evento`.
+`DATABASE_URL` is the transaction pooler (6543, `?pgbouncer=true`); `DIRECT_URL`
+is the session pooler (5432); `SESSION_SECRET` must be at least 32 characters.
+
+Verify the stored length matches the source — this catches newline corruption:
 
 ```bash
-printf '%s' 'PASTE_VALUE_HERE' | gcloud secrets versions add DATABASE_URL --data-file=-
+gcloud secrets versions access latest --secret=VEYRA_DATABASE_URL | wc -c
 ```
 
-`DATABASE_URL` is the transaction pooler (port 6543, `?pgbouncer=true`);
-`DIRECT_URL` is the session pooler (port 5432). Then grant read access:
+Then grant read access:
 
 ```bash
-for S in DATABASE_URL DIRECT_URL SESSION_SECRET; do
-  gcloud secrets add-iam-policy-binding "$S" \
+for n in VEYRA_DATABASE_URL VEYRA_DIRECT_URL VEYRA_SESSION_SECRET; do
+  gcloud secrets add-iam-policy-binding "$n" \
     --member="serviceAccount:veyra-api@$PROJECT.iam.gserviceaccount.com" \
     --role=roles/secretmanager.secretAccessor
 done
 ```
+
+**Rotating a secret does not restart the service.** `:latest` is resolved when a
+revision starts, so a new version needs a redeploy (§4) to take effect.
 
 ## 3. Migrations
 
@@ -107,10 +132,10 @@ gcloud run deploy veyra-api \
   --source . \
   --region "$REGION" \
   --service-account "veyra-api@$PROJECT.iam.gserviceaccount.com" \
-  --add-volume=name=documents,type=cloud-storage,bucket="$PROJECT-documents" \
+  --add-volume=name=documents,type=cloud-storage,bucket="$PROJECT-veyra-documents" \
   --add-volume-mount=volume=documents,mount-path=/mnt/storage \
-  --set-env-vars=STORAGE_DRIVER=local,STORAGE_LOCAL_ROOT=/mnt/storage,CORS_ORIGIN=https://YOUR_WEB_ORIGIN,WORKERS_ENABLED=true,MAILER_DRIVER=console,SESSION_COOKIE_NAME=veyra_session,SESSION_TTL_HOURS=12 \
-  --set-secrets=DATABASE_URL=DATABASE_URL:latest,DIRECT_URL=DIRECT_URL:latest,SESSION_SECRET=SESSION_SECRET:latest \
+  --set-env-vars=STORAGE_DRIVER=local,STORAGE_LOCAL_ROOT=/mnt/storage,CORS_ORIGIN=http://localhost:5173,WORKERS_ENABLED=true,MAILER_DRIVER=console,SESSION_COOKIE_NAME=veyra_session,SESSION_TTL_HOURS=12 \
+  --set-secrets=DATABASE_URL=VEYRA_DATABASE_URL:latest,DIRECT_URL=VEYRA_DIRECT_URL:latest,SESSION_SECRET=VEYRA_SESSION_SECRET:latest \
   --min-instances=1 \
   --max-instances=1 \
   --no-cpu-throttling \
@@ -157,6 +182,21 @@ Set `CORS_ORIGIN` to that web origin. If the two ever end up on different
 origins, the cookie needs `SameSite=None; Secure` and the client needs a real
 API base URL — a code change, not configuration.
 
+## Verifying a deploy
+
+```bash
+curl -s https://veyra-api-695868445245.asia-south1.run.app/api/health
+# {"status":"ok","db":"up","time":"..."}
+```
+
+`/api/health` is `@Public` and reports database connectivity, so a 200 with
+`"db":"up"` covers the image, secrets, and the Supabase pooler in one call.
+
+To prove the GCS mount rather than assume it, write an object to the bucket and
+read it back through the app's signed-URL route (`@Public`, HMAC-gated, so no
+login is needed) — see `LocalStorageService.sign`:
+`sha256("<key>:<expiresMs>:<SESSION_SECRET>")`.
+
 ## Known gaps
 
 - The runtime image ships build-only dependencies; `node_modules` is copied
@@ -168,3 +208,12 @@ API base URL — a code change, not configuration.
   `mailer.service.ts` and needs finishing before real invitations go out.
 - `npm ci` reports 3 high-severity advisories; worth an `npm audit` pass before
   this handles real deal data.
+- `CORS_ORIGIN` is currently `http://localhost:5173`, a placeholder — the web
+  client is not deployed yet. Note that cross-origin browser auth will not work
+  against it regardless: the session cookie is `SameSite=Lax`, so it is dropped
+  on cross-site requests. The same-origin proxy in §5 is the supported path.
+- Cron timers are *configured* to fire (`--no-cpu-throttling`, `--min-instances=1`)
+  but this has not been observed end-to-end — the workers log only on error or
+  when draining real work, and the queue was empty. Confirm with a queued email.
+- Veyra shares the `evento-502713` project, so billing and IAM blast radius are
+  shared with an unrelated service.
