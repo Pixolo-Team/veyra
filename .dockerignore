@@ -1,0 +1,27 @@
+node_modules
+**/node_modules
+
+# Build output — the image compiles its own.
+dist
+**/dist
+**/*.tsbuildinfo
+storybook-static
+
+# Secrets must never enter the build context.
+.env
+.env.*
+!.env.example
+
+# Locally uploaded documents.
+apps/api/storage/*
+
+.git
+.github
+.claude
+docs
+*.md
+!apps/api/prisma/**/*.md
+
+.DS_Store
+.vscode
+.idea

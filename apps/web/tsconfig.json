@@ -4,5 +4,11 @@
     "tsBuildInfoFile": "./node_modules/.tmp/web.tsbuildinfo",
     "types": ["vite/client", "node"]
   },
+  /*
+   * `@veyra/contracts` resolves through its package `exports` to ./dist, which
+   * only exists once that project is built. Referencing it here makes `tsc -b`
+   * build it first, so a clean checkout (CI, Vercel) doesn't fail with TS2307.
+   */
+  "references": [{ "path": "../../packages/contracts" }],
   "include": ["src", "vite.config.ts"]
 }

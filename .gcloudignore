@@ -1,0 +1,27 @@
+# What `gcloud run deploy --source .` uploads to Cloud Build.
+#
+# gcloud falls back to .gitignore when this file is absent, which would upload
+# the whole .git history on every deploy. Keep this in step with .dockerignore.
+
+.git
+.gitignore
+
+node_modules
+**/node_modules
+
+dist
+**/dist
+**/*.tsbuildinfo
+storybook-static
+
+.env
+.env.*
+!.env.example
+
+apps/api/storage/*
+
+.claude
+docs
+.DS_Store
+.vscode
+.idea
