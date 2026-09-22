@@ -7,11 +7,13 @@ import {
   activityWindowSchema,
   type ActivitySummary,
   type ActivityWindow,
+  type Dashboard,
   type Overview,
 } from '@veyra/contracts';
 import { type AuthedRequest, CurrentUser } from '../auth/auth.decorators';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { ActivityService } from './activity.service';
+import { DashboardService } from './dashboard.service';
 import { OverviewService } from './overview.service';
 
 type Authed = NonNullable<AuthedRequest['user']>;
@@ -21,11 +23,17 @@ export class OverviewController {
   constructor(
     private readonly overview: OverviewService,
     private readonly activity: ActivityService,
+    private readonly dashboard: DashboardService,
   ) {}
 
   @Get('overview')
   get(@CurrentUser() user: Authed, @Param('roomId') roomId: string): Promise<Overview> {
     return this.overview.get(user.id, roomId);
+  }
+
+  @Get('dashboard')
+  getDashboard(@CurrentUser() user: Authed, @Param('roomId') roomId: string): Promise<Dashboard> {
+    return this.dashboard.get(user.id, roomId);
   }
 
   @Get('activity')

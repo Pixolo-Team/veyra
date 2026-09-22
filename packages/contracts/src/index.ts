@@ -7,3 +7,4 @@ export * from './participants';
 export * from './documents';
 export * from './review';
 export * from './overview';
+export * from './dashboard';

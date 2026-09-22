@@ -29,6 +29,7 @@ export const qk = {
   rooms: ['rooms'] as const,
   room: (roomId: string) => ['rooms', roomId] as const,
   overview: (roomId: string) => ['rooms', roomId, 'overview'] as const,
+  dashboard: (roomId: string) => ['rooms', roomId, 'dashboard'] as const,
   participants: (roomId: string) => ['rooms', roomId, 'participants'] as const,
   invitations: (roomId: string) => ['rooms', roomId, 'invitations'] as const,
   tree: (roomId: string, section: ModuleSection) => ['rooms', roomId, 'tree', section] as const,
@@ -77,6 +78,9 @@ export const roomQuery = (roomId: string) =>
 
 export const overviewQuery = (roomId: string) =>
   queryOptions({ queryKey: qk.overview(roomId), queryFn: () => overviewApi.get(roomId) });
+
+export const dashboardQuery = (roomId: string) =>
+  queryOptions({ queryKey: qk.dashboard(roomId), queryFn: () => overviewApi.dashboard(roomId) });
 
 export const participantsQuery = (roomId: string) =>
   queryOptions({ queryKey: qk.participants(roomId), queryFn: () => roomsApi.participants(roomId) });
