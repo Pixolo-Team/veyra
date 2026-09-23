@@ -6,8 +6,10 @@
  *   R1  recipient + admin       r1.demo@astrivax.com
  *   R2  recipient + contributor r2.demo@astrivax.com
  *
- * All share one password (override with DEMO_PASSWORD, default
- * `VeyraDemo2026!`). The demo room has NDA disabled so each login lands
+ * All share one password, taken from `DEMO_PASSWORD` (no default — a
+ * known password must never live in source). Override the logins and room
+ * with `DEMO_D1_EMAIL` / `DEMO_D2_EMAIL` / `DEMO_R1_EMAIL` /
+ * `DEMO_R2_EMAIL` / `DEMO_ROOM_NAME`.
  * straight on the Overview dashboard, and carries just enough content —
  * documents, a viewed/read trail, a download, threads with a mention, and one
  * pending invite — that every dashboard block has something to show.
@@ -23,25 +25,61 @@ import { ensureDiscloserCompany } from './dev-company';
 
 const prisma = new PrismaClient();
 
-const PASSWORD = process.env.DEMO_PASSWORD ?? 'VeyraDemo2026!';
-const ROOM_NAME = 'Elacitinib — Demo Dataroom';
+/** Secrets never get a code default — fail loudly instead of seeding one. */
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing ${name} — export it before seeding demo logins.`);
+  }
+  return value;
+}
+
+const ROOM_NAME = process.env.DEMO_ROOM_NAME ?? 'Elacitinib — Demo Dataroom';
 
 const RECIPIENT_COMPANY_ID = 'seed-company-astrivax';
-const RECIPIENT_COMPANY_NAME = 'Astrivax Therapeutics';
-const RECIPIENT_DOMAIN = 'astrivax.com';
+const RECIPIENT_COMPANY_NAME = process.env.DEMO_RECIPIENT_COMPANY ?? 'Astrivax Therapeutics';
+const RECIPIENT_DOMAIN = process.env.DEMO_RECIPIENT_DOMAIN ?? 'astrivax.com';
 
-const DEMO_USERS = [
-  { email: 'd1.demo@corvellis.com', name: 'Demo Disclosure Admin', side: 'discloser', role: 'admin' },
-  { email: 'd2.demo@corvellis.com', name: 'Demo Disclosure Contributor', side: 'discloser', role: 'contributor' },
-  { email: 'r1.demo@astrivax.com', name: 'Demo Recipient Admin', side: 'recipient', role: 'admin' },
-  { email: 'r2.demo@astrivax.com', name: 'Demo Recipient Contributor', side: 'recipient', role: 'contributor' },
-] as const;
+interface DemoUser {
+  email: string;
+  name: string;
+  side: 'discloser' | 'recipient';
+  role: 'admin' | 'contributor';
+}
+
+const DEMO_USERS: DemoUser[] = [
+  {
+    email: process.env.DEMO_D1_EMAIL ?? 'd1.demo@corvellis.com',
+    name: 'Demo Disclosure Admin',
+    side: 'discloser',
+    role: 'admin',
+  },
+  {
+    email: process.env.DEMO_D2_EMAIL ?? 'd2.demo@corvellis.com',
+    name: 'Demo Disclosure Contributor',
+    side: 'discloser',
+    role: 'contributor',
+  },
+  {
+    email: process.env.DEMO_R1_EMAIL ?? 'r1.demo@astrivax.com',
+    name: 'Demo Recipient Admin',
+    side: 'recipient',
+    role: 'admin',
+  },
+  {
+    email: process.env.DEMO_R2_EMAIL ?? 'r2.demo@astrivax.com',
+    name: 'Demo Recipient Contributor',
+    side: 'recipient',
+    role: 'contributor',
+  },
+];
 
 async function main(): Promise<void> {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Refusing to create known-password accounts in production.');
   }
 
+  const password = requiredEnv('DEMO_PASSWORD');
   const { company: discloser, tenant } = await ensureDiscloserCompany(prisma);
 
   const recipient = await prisma.company.upsert({
@@ -63,7 +101,7 @@ async function main(): Promise<void> {
     });
   }
 
-  const passwordHash = await argon2.hash(PASSWORD, { type: argon2.argon2id });
+  const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
   const users = new Map<string, { id: string; email: string; name: string | null }>();
   for (const demo of DEMO_USERS) {
     const user = await prisma.user.upsert({
@@ -157,9 +195,12 @@ async function main(): Promise<void> {
       where: { roomId: room.id, section: 'dossier' },
       orderBy: { sortOrder: 'asc' },
     });
-    const d1 = participants.get('d1.demo@corvellis.com')!;
-    const r1 = participants.get('r1.demo@astrivax.com')!;
-    const r2 = participants.get('r2.demo@astrivax.com')!;
+    const participantOf = (role: DemoUser['role'], side: DemoUser['side']) => {
+      const demo = DEMO_USERS.find((u) => u.role === role && u.side === side)!;
+      return participants.get(demo.email)!;
+    };
+    const r1 = participantOf('admin', 'recipient');
+    const r2 = participantOf('contributor', 'recipient');
 
     const docs = [];
     for (const name of ['1.0 Cover letter', '1.2 Application form', '2.2 Introduction']) {
@@ -249,7 +290,6 @@ async function main(): Promise<void> {
     await prisma.commentMention.create({
       data: { commentId: firstComment.id, participantId: r2.id },
     });
-    void d1;
 
     const closedThread = await prisma.commentThread.create({
       data: {
@@ -285,7 +325,7 @@ async function main(): Promise<void> {
   for (const demo of DEMO_USERS) {
     console.log(`  ${demo.side}/${demo.role}: ${demo.email}`);
   }
-  console.log(`  password: ${PASSWORD}`);
+  console.log(`  password: (the DEMO_PASSWORD you exported)`);
 }
 
 main()
