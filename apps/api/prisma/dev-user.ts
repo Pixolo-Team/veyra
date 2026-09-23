@@ -16,13 +16,22 @@ import { COMPANY_DOMAIN, ensureDiscloserCompany } from './dev-company';
 const prisma = new PrismaClient();
 
 const EMAIL = process.env.DEV_USER_EMAIL ?? `dev@${COMPANY_DOMAIN}`;
-const PASSWORD = process.env.DEV_USER_PASSWORD ?? 'VeyraDev2026!';
 const NAME = process.env.DEV_USER_NAME ?? 'Dev Admin';
+
+/** Secrets never get a code default — fail loudly instead of seeding one. */
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing ${name} — export it before creating a dev login.`);
+  }
+  return value;
+}
 
 async function main(): Promise<void> {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Refusing to create a known-password account in production.');
   }
+  const password = requiredEnv('DEV_USER_PASSWORD');
 
   // Reuse the seed's company/tenant so this account owns the same rooms.
   const { company, tenant } = await ensureDiscloserCompany(prisma);
@@ -31,7 +40,7 @@ async function main(): Promise<void> {
   // than leaving two dev logins behind.
   await prisma.user.updateMany({ where: { email: 'dev@veyra.local' }, data: { email: EMAIL } });
 
-  const passwordHash = await argon2.hash(PASSWORD, { type: argon2.argon2id });
+  const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
 
   const user = await prisma.user.upsert({
     where: { email: EMAIL },
@@ -74,7 +83,7 @@ async function main(): Promise<void> {
 
   console.log('Dev login ready — no password reset required.');
   console.log(`  email:    ${EMAIL}`);
-  console.log(`  password: ${PASSWORD}`);
+  console.log(`  password: (the DEV_USER_PASSWORD you exported)`);
   console.log(`  tenant:   ${company.name} (owner)`);
   console.log(`  rooms:    ${rooms.length} in this tenant — NDA click-through still applies`);
 }

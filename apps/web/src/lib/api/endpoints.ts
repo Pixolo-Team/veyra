@@ -18,6 +18,7 @@ import type {
   CreateInvitationRequest,
   CreateRoomRequest,
   CreateThreadRequest,
+  Dashboard,
   DocumentDetail,
   InvitationDto,
   InvitationPreview,
@@ -184,6 +185,7 @@ export const reviewApi = {
 
 export const overviewApi = {
   get: (roomId: string) => api.get<Overview>(`/rooms/${roomId}/overview`),
+  dashboard: (roomId: string) => api.get<Dashboard>(`/rooms/${roomId}/dashboard`),
   activity: (roomId: string, query: ActivityQuery) =>
     api.get<ActivityPage>(`/rooms/${roomId}/activity`, {
       query: query as Record<string, string | number | undefined>,
