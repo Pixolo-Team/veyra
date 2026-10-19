@@ -4,6 +4,7 @@ import { Reflector } from '@nestjs/core';
 import type { CookieOptions, Response } from 'express';
 import { RequestContextService } from '../common/request-context';
 import type { Env } from '../config/env';
+import { PrismaService } from '../prisma/prisma.service';
 import { type AuthedRequest, IS_PUBLIC_KEY } from './auth.decorators';
 import { SessionService } from './session.service';
 
@@ -16,14 +17,23 @@ import { SessionService } from './session.service';
 export class AuthGuard implements CanActivate {
   private readonly cookieName: string;
   private readonly cookieBase: CookieOptions;
+  private readonly devBypassEmail: string | null;
 
   constructor(
     private readonly reflector: Reflector,
     private readonly sessions: SessionService,
     private readonly requestCtx: RequestContextService,
+    private readonly prisma: PrismaService,
     config: ConfigService<Env, true>,
   ) {
     this.cookieName = config.get('SESSION_COOKIE_NAME', { infer: true });
+    // Branch-only local-dev login bypass. `validateEnv` already refuses this
+    // combination in production, so the NODE_ENV re-check here is belt-and-braces.
+    this.devBypassEmail =
+      config.get('DEV_AUTH_BYPASS', { infer: true }) &&
+      config.get('NODE_ENV', { infer: true }) !== 'production'
+        ? config.get('DEV_AUTH_BYPASS_EMAIL', { infer: true })
+        : null;
     this.cookieBase = {
       httpOnly: true,
       sameSite: 'lax',
@@ -48,15 +58,24 @@ export class AuthGuard implements CanActivate {
      * a 401, and "you" when there is a cookie. So the resolve still runs, and
      * only the throwing is conditional.
      */
-    if (!token) {
-      if (isPublic) return true;
-      throw new UnauthorizedException('Not signed in');
-    }
+    const resolved = token ? await this.sessions.resolve(token) : null;
 
-    const resolved = await this.sessions.resolve(token);
     if (!resolved) {
+      // Local-dev bypass: no valid session, but this branch is configured to
+      // act as a fixed user. Applies to public routes too, so `/auth/me`
+      // reports the dev user and the SPA renders as signed in.
+      if (this.devBypassEmail) {
+        const devUser = await this.prisma.user.findUnique({
+          where: { email: this.devBypassEmail },
+        });
+        if (devUser) {
+          req.user = devUser;
+          this.requestCtx.set({ userId: devUser.id });
+          return true;
+        }
+      }
       if (isPublic) return true;
-      throw new UnauthorizedException('Session expired');
+      throw new UnauthorizedException(token ? 'Session expired' : 'Not signed in');
     }
 
     req.user = resolved.user;

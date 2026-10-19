@@ -16,6 +16,15 @@ const schema = z.object({
   SESSION_TTL_HOURS: z.coerce.number().int().positive().default(12),
   SESSION_SECRET: z.string().min(32),
 
+  // Local-dev login bypass (branch: local-dev-setup). When 'true' and
+  // NODE_ENV !== 'production', AuthGuard treats every unauthenticated request
+  // as DEV_AUTH_BYPASS_EMAIL. Hard-refused at boot in production below.
+  DEV_AUTH_BYPASS: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  DEV_AUTH_BYPASS_EMAIL: z.string().default('dev@corvellis.com'),
+
   STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
   STORAGE_LOCAL_ROOT: z.string().default('storage'),
 
@@ -48,6 +57,9 @@ export function validateEnv(raw: Record<string, unknown>): Env {
       .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
       .join('\n');
     throw new Error(`Invalid environment:\n${issues}`);
+  }
+  if (parsed.data.DEV_AUTH_BYPASS && parsed.data.NODE_ENV === 'production') {
+    throw new Error('DEV_AUTH_BYPASS must never be enabled in production.');
   }
   if (parsed.data.STORAGE_DRIVER === 's3') {
     const missing = (['S3_REGION', 'S3_BUCKET', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'] as const).filter(

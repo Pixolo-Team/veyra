@@ -198,7 +198,7 @@ export class RoomsService {
       );
     }
 
-    await this.prisma.room.update({ where: { id: roomId }, data: { status: next } });
+    await this.prisma.room.update({ where: { id: roomId }, data: { status: next as any } });
     await this.audit.record({
       action: 'room.status_changed',
       roomId,

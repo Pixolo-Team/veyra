@@ -8,3 +8,4 @@ export * from './documents';
 export * from './review';
 export * from './overview';
 export * from './dashboard';
+export * from './company-dashboard';
