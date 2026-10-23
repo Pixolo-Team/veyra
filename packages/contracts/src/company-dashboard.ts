@@ -1,128 +1,63 @@
 import { z } from 'zod';
 import { idSchema } from './common';
-import { activeSideSchema, participantRoleSchema } from './enums';
+import { activeSideSchema, participantRoleSchema, roomStatusSchema } from './enums';
+import { activityEventSchema } from './overview';
 
 /**
- * Per-company dashboard contract.
+ * Per-company dashboard (Image 1): the rollup across every data room the
+ * viewer belongs to for this company.
  *
- * One endpoint (`GET /companies/:companyId/dashboard`) answers every role.
- * The server computes everything and nulls the blocks a role must not see —
- * so the client only decides *layout*, never *access*.
- *
- * Role map used by the UI:
- *   D1 = discloser + admin        R1 = recipient + admin
- *   D2 = discloser + contributor  R2 = recipient + contributor
- * (`reviewer` renders as its side's contributor.)
+ * One endpoint (`GET /companies/:companyId/dashboard`) answers every role. The
+ * server only ever returns rooms the caller is an active participant in, so
+ * there is nothing to gate on the client — the list is the access control.
  */
 
 export const companyDashboardViewerSchema = z.object({
   side: activeSideSchema,
   role: participantRoleSchema,
-  participantId: idSchema,
 });
 export type CompanyDashboardViewer = z.infer<typeof companyDashboardViewerSchema>;
 
-export const companyDashboardModuleSchema = z.object({
-  id: idSchema,
-  code: z.string(),
-  title: z.string(),
-  section: z.enum(['dossier', 'documents']),
+/** One data room, as a row in the company's dossier list. */
+export const companyDashboardRoomSchema = z.object({
+  roomId: idSchema,
+  roomName: z.string(),
+  status: roomStatusSchema,
   documentCount: z.number().int(),
-  completed: z.boolean(),
+  /** % of docs opened by the recipient side, 0–100; null when there are none. */
+  coveragePct: z.number().nullable(),
+  openThreads: z.number().int(),
+  lastActivityAt: z.string().nullable(),
 });
-export type CompanyDashboardModule = z.infer<typeof companyDashboardModuleSchema>;
-
-export const companyDashboardLeaderboardEntrySchema = z.object({
-  name: z.string(),
-  company: z.string().nullable(),
-  side: activeSideSchema.nullable(),
-  seconds: z.number().int(),
-});
-export type CompanyDashboardLeaderboardEntry = z.infer<typeof companyDashboardLeaderboardEntrySchema>;
-
-export const companyDashboardAttentionReasonSchema = z.enum(['mention', 'unanswered', 'open-thread']);
-export type CompanyDashboardAttentionReason = z.infer<typeof companyDashboardAttentionReasonSchema>;
-
-export const companyDashboardAttentionItemSchema = z.object({
-  threadId: idSchema,
-  documentId: idSchema.nullable(),
-  documentName: z.string().nullable(),
-  reason: companyDashboardAttentionReasonSchema,
-  createdAt: z.string(),
-});
-export type CompanyDashboardAttentionItem = z.infer<typeof companyDashboardAttentionItemSchema>;
+export type CompanyDashboardRoom = z.infer<typeof companyDashboardRoomSchema>;
 
 export const companyDashboardSchema = z.object({
   companyId: idSchema,
   companyName: z.string(),
+  /** How the viewer relates to this company's rooms (strongest role wins). */
   viewer: companyDashboardViewerSchema,
 
-  /** Setup checklist — how many modules hold documents yet. Shown to all. */
-  checklist: z.object({
-    modules: z.array(companyDashboardModuleSchema),
-    completedCount: z.number().int(),
-    totalCount: z.number().int(),
+  summary: z.object({
+    totalRooms: z.number().int(),
+    totalDocuments: z.number().int(),
+    openQuestions: z.number().int(),
+    /** Mean coverage across rooms that have documents; null when none do. */
+    avgCoveragePct: z.number().nullable(),
   }),
 
-  threads: z.object({
-    open: z.number().int(),
-    resolved: z.number().int(),
-    myOpen: z.number().int(),
-    myTotal: z.number().int(),
-  }),
+  /** The viewer's rooms for this company, most recently active first. */
+  rooms: z.array(companyDashboardRoomSchema),
 
-  documents: z.object({
-    total: z.number().int(),
-    unopened: z.number().int(),
-    unread: z.number().int(),
-    revised: z.number().int(),
-    unresolved: z.number().int(),
-    withFeedback: z.number().int(),
-  }),
-
-  coverage: z.object({
-    viewed: z.number().int(),
-    total: z.number().int(),
-    pct: z.number().nullable(),
-  }),
-
-  dossierOpened: z.object({
-    viewed: z.number().int(),
-    total: z.number().int(),
-    pct: z.number().nullable(),
-  }),
-
-  recipient: z
-    .object({
-      lastActiveAt: z.string().nullable(),
-      daysSinceActive: z.number().int().nullable(),
-    })
-    .nullable(),
-
-  downloads: z.object({ count: z.number().int() }).nullable(),
-
-  reading: z.object({
-    mySeconds: z.number().int(),
-    totalSeconds: z.number().int(),
-    leaderboard: z.array(companyDashboardLeaderboardEntrySchema),
-  }),
-
-  medians: z.object({
-    replySeconds: z.number().int().nullable(),
-    resolveSeconds: z.number().int().nullable(),
-  }),
-
-  participants: z.any().nullable(),
-
-  attention: z.array(companyDashboardAttentionItemSchema),
+  /** Latest events across those rooms, newest first. */
+  recentActivity: z.array(activityEventSchema),
 });
 export type CompanyDashboard = z.infer<typeof companyDashboardSchema>;
 
-/** Company list item for the dashboard header. */
-export const companyDashboardSummarySchema = z.object({
+/** One entry in the "which company dashboard can I open" list. */
+export const myCompanySchema = z.object({
   companyId: idSchema,
-  totalRooms: z.number().int(),
-  totalDocuments: z.number().int(),
-  avgCoverage: z.number().nullable(),
+  companyName: z.string(),
+  side: activeSideSchema,
+  role: participantRoleSchema,
 });
-export type CompanyDashboardSummary = z.infer<typeof companyDashboardSummarySchema>;
+export type MyCompany = z.infer<typeof myCompanySchema>;

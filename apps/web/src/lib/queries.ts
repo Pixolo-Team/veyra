@@ -16,6 +16,7 @@ import type {
 import { ApiError } from './api/client';
 import {
   authApi,
+  companiesApi,
   documentsApi,
   invitationsApi,
   overviewApi,
@@ -43,6 +44,8 @@ export const qk = {
   threads: (versionId: string, query: ThreadListQuery) =>
     ['versions', versionId, 'threads', query] as const,
   invitationPreview: (token: string) => ['invitation-preview', token] as const,
+  companies: ['companies'] as const,
+  companyDashboard: (companyId: string) => ['companies', companyId, 'dashboard'] as const,
 };
 
 /**
@@ -81,6 +84,17 @@ export const overviewQuery = (roomId: string) =>
 
 export const dashboardQuery = (roomId: string) =>
   queryOptions({ queryKey: qk.dashboard(roomId), queryFn: () => overviewApi.dashboard(roomId) });
+
+export const companiesQuery = queryOptions({
+  queryKey: qk.companies,
+  queryFn: () => companiesApi.mine(),
+});
+
+export const companyDashboardQuery = (companyId: string) =>
+  queryOptions({
+    queryKey: qk.companyDashboard(companyId),
+    queryFn: () => companiesApi.dashboard(companyId),
+  });
 
 export const participantsQuery = (roomId: string) =>
   queryOptions({ queryKey: qk.participants(roomId), queryFn: () => roomsApi.participants(roomId) });

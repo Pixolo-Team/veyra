@@ -8,8 +8,9 @@ import { PlusIcon } from '../components/icons';
 import { PlainLayout } from '../components/PlainLayout';
 import { messageOf } from '../lib/errorMessage';
 import { ROLE_SHORT } from '../lib/labels';
-import { roomsQuery } from '../lib/queries';
+import { companiesQuery, roomsQuery } from '../lib/queries';
 import { absoluteTime, relativeTime } from '../lib/relativeTime';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 /**
  * Every room this person is a participant in (D12). The list is their
@@ -17,7 +18,42 @@ import { absoluteTime, relativeTime } from '../lib/relativeTime';
  */
 export function RoomsIndex() {
   const rooms = useQuery(roomsQuery);
+  const companies = useQuery(companiesQuery);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  
+const deleteMutation = useMutation({
+  mutationFn: async (roomId: string) => {
+    const res = await fetch(`/api/rooms/${roomId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status: 'deleted' }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to delete room');
+    }
+
+    return res;
+  },
+
+  onSuccess: async (_, roomId) => {
+    await queryClient.invalidateQueries({
+      queryKey: ['rooms'],
+    });
+
+    await queryClient.invalidateQueries({
+      queryKey: ['room', roomId],
+    });
+  },
+
+  onError: (error) => {
+    console.error('Room deletion failed:', error);
+  },
+})
+  const primaryCompany = companies.data?.[0];
 
   return (
     <PlainLayout>
@@ -25,9 +61,23 @@ export function RoomsIndex() {
         title="Rooms"
         subtitle="Every data room you have access to."
         actions={
-          <Button intent="primary" icon={<PlusIcon />} onClick={() => void navigate({ to: '/rooms/new' })}>
-            Create a data room
-          </Button>
+          <>
+            {primaryCompany ? (
+              <Button
+                onClick={() =>
+                  void navigate({
+                    to: '/companies/$companyId/dashboard',
+                    params: { companyId: primaryCompany.companyId },
+                  })
+                }
+              >
+                Company Dashboard
+              </Button>
+            ) : null}
+            <Button intent="primary" icon={<PlusIcon />} onClick={() => void navigate({ to: '/rooms/new' })}>
+              Create a data room
+            </Button>
+          </>
         }
       />
       <PageBody maxWidth={880}>
@@ -40,7 +90,7 @@ export function RoomsIndex() {
         ) : (
           <Stack gap="sm">
             {rooms.data.map((room) => (
-              <RoomCard key={room.id} room={room} />
+              <RoomCard key={room.id} room={room} deleteMutation={deleteMutation} />
             ))}
           </Stack>
         )}
@@ -83,7 +133,7 @@ function EmptyRooms() {
   );
 }
 
-function RoomCard({ room }: { room: RoomListItem }) {
+function RoomCard({ room, deleteMutation }: { room: RoomListItem; deleteMutation: { mutate: (id: string) => void } }) {
   const { colors, space, shadows } = useVeyraTokens();
   const relative = relativeTime(room.lastActivityAt);
 
@@ -123,6 +173,20 @@ function RoomCard({ room }: { room: RoomListItem }) {
             'No activity yet'
           )}
         </Typography.Text>
+        {/* Delete Button */}
+        {room.participantStatus !== 'revoked' && room.status !== 'deleted' && (
+          <Button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to delete this data room? This action cannot be undone.')) {
+                deleteMutation.mutate(room.id);
+              }
+            }}
+            style={{ marginLeft: 8 }}
+            intent="danger"
+          >
+            Delete
+          </Button>
+        )}
       </div>
     </Link>
   );
