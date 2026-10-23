@@ -1,9 +1,10 @@
 import { useParams } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Empty, Progress, Skeleton, Tag, Typography } from 'antd';
+import { Alert, Breadcrumb, Empty, Progress, Skeleton, Tag, Typography } from 'antd';
 import { Link } from '@tanstack/react-router';
 import type { CompanyDashboard, CompanyDashboardRoom } from '@veyra/contracts';
-import { Stack, useVeyraTokens } from '@veyra/design-system';
+import { PlusIcon, useVeyraTokens } from '@veyra/design-system';
+import { Button, Stack } from '@veyra/design-system';
 import { PageBody, PageHeader, RoomStatusTag } from '../components/Page';
 import { PlainLayout } from '../components/PlainLayout';
 import { companyDashboardQuery } from '../lib/queries';
@@ -59,12 +60,29 @@ function CompanyDashboardView({ data }: { data: CompanyDashboard }) {
   const { summary, rooms, recentActivity, companyName } = data;
   const roleLabel = data.viewer.role === 'admin' ? 'Admin' : data.viewer.role === 'contributor' ? 'Contributor' : 'Reviewer';
 
+  // Breadcrumb items based on reference design
+  const breadcrumbItems = [
+    { label: companyName, href: '#' },
+    { label: 'Product Exchange', href: '#' },
+    { label: 'Out-Licensing', href: '#' },
+  ];
+
   return (
     <PlainLayout>
+      <Breadcrumb
+        style={{ marginBottom: space.md }}
+        items={breadcrumbItems}
+        separator="/"
+      />
       <PageHeader
         title={`${companyName} Data Room`}
         subtitle={`Dashboard · ${roleLabel}`}
         tag={<RoomStatusTag status={rooms[0]?.status ?? 'active'} />}
+        actions={
+          <Button icon={<PlusIcon />}>
+            New Dossier
+          </Button>
+        }
       />
       <PageBody maxWidth="none">
         <Stack gap="lg">
