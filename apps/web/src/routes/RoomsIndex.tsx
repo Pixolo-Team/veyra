@@ -1,4 +1,4 @@
-import { Alert, Empty, Skeleton, Tag, Tooltip, Typography } from 'antd';
+import { Alert, App, Empty, Skeleton, Tag, Tooltip, Typography } from 'antd';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import type { RoomListItem } from '@veyra/contracts';
@@ -133,8 +133,15 @@ function EmptyRooms() {
   );
 }
 
-function RoomCard({ room, deleteMutation }: { room: RoomListItem; deleteMutation: { mutate: (id: string) => void } }) {
+function RoomCard({
+  room,
+  deleteMutation,
+}: {
+  room: RoomListItem;
+  deleteMutation: { mutate: (id: string) => void; mutateAsync: (id: string) => Promise<unknown> };
+}) {
   const { colors, space, shadows } = useVeyraTokens();
+  const { modal } = App.useApp();
   const relative = relativeTime(room.lastActivityAt);
 
   return (
@@ -176,10 +183,19 @@ function RoomCard({ room, deleteMutation }: { room: RoomListItem; deleteMutation
         {/* Delete Button */}
         {room.participantStatus !== 'revoked' && room.status !== 'deleted' && (
           <Button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to delete this data room? This action cannot be undone.')) {
-                deleteMutation.mutate(room.id);
-              }
+            onClick={(event) => {
+              // The card is a link into the room — don't navigate on Delete.
+              event.preventDefault();
+              event.stopPropagation();
+              modal.confirm({
+                title: `Delete “${room.name}”?`,
+                content:
+                  'This data room will be permanently marked as deleted. This action cannot be undone.',
+                okText: 'Delete',
+                okButtonProps: { danger: true },
+                cancelText: 'Cancel',
+                onOk: () => deleteMutation.mutateAsync(room.id),
+              });
             }}
             style={{ marginLeft: 8 }}
             intent="danger"
