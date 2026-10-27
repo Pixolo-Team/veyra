@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { Tooltip } from 'antd';
-import { Link, Outlet, useMatchRoute, useParams, useNavigate } from '@tanstack/react-router';
+import { Link, Outlet, useMatchRoute, useParams } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Stack, useVeyraTokens } from '@veyra/design-system';
 import { Brand } from './Brand';
@@ -21,8 +21,6 @@ import { roomQuery } from '../lib/queries';
 import { rememberRoom } from '../lib/lastRoom';
 import { useSidebarMode, type SidebarMode } from '../lib/sidebarMode';
 import { useLogout } from '../app/session';
-import { api } from '../lib/api/client';
-
 
 /** Lucide draws on a 24px grid; 18px is the size that sits right next to 14px text. ]
 */
@@ -76,36 +74,6 @@ function navRowStyle(args: {
   };
 }
 
-/** One row of the rail. `Link` and `button` differ enough to be worth sharing the skin. */
-function row(args: {
-  to: string;
-  text: string;
-  icon: ReactNode;
-  onClick?: () => void;
-}) {
-  const active = Boolean(matchRoute({ to, params: { roomId } }));
-  const isDeleteRoute = args.to === '/rooms/$roomId/delete';
-  if (isDeleteRoute && args.onClick) {
-    // Don't render Link for delete; caller handles onClick
-    return args.onClick();
-  }
-  return withLabel(
-    args.text,
-    <Link
-      key={args.to}
-      to={args.to}
-      params={{ roomId }}
-      aria-current={active ? 'page' : undefined}
-      aria-label={compact ? args.text : undefined}
-      className="veyra-rail-row"
-      style={navRowStyle({ active, compact, colors, space })}
-    >
-      {args.icon}
-      {compact ? null : args.text}
-    </Link>,
-  );
-}
-
 /**
  * The room chrome every in-room page renders inside. The route guard has
  * already resolved the room and bounced a pending NDA, so this only has to draw.
@@ -139,6 +107,7 @@ export function RoomLayout() {
       node
     );
 
+  /** One row of the rail: icon, label, active state. */
   const row = (to: string, text: string, icon: ReactNode) => {
     const active = Boolean(matchRoute({ to, params: { roomId } }));
     return withLabel(
@@ -233,7 +202,7 @@ export function RoomLayout() {
         <RoomSwitcher room={room} compact={compact} />
 
         <Stack gap="xxs" style={{ flex: 1 }}>
-          {NAV.map((item) => row(item.to, item.label, item.icon, item.to === '/rooms/$roomId/delete' ? () => handleDelete() : undefined))}
+          {NAV.map((item) => row(item.to, item.label, item.icon))}
         </Stack>
 
         {/* Room admin and the way out. Pinned to the foot with a gap above —
