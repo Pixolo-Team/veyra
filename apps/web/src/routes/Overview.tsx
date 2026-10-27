@@ -2,7 +2,7 @@ import { useParams } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Empty, Progress, Skeleton, Tag, Typography } from 'antd';
 import type { Dashboard } from '@veyra/contracts';
-import { Stack, useVeyraTokens } from '@veyra/design-system';
+import { CheckCircleIcon, CommentIcon, FileIcon, Stack, useVeyraTokens } from '@veyra/design-system';
 import { PageBody, PageHeader, RoomStatusTag } from '../components/Page';
 import { dashboardQuery, overviewQuery } from '../lib/queries';
 import { messageOf } from '../lib/errorMessage';
@@ -14,8 +14,9 @@ import { describeAction, describeTarget, formatDuration } from '../lib/auditEven
  *
  * One endpoint answers every role (D1/R1/D2/R2) and nulls the blocks a role
  * must not see, so this file only does layout: two hero numbers at the top,
- * the module status table on the left, the attention sidebar on the right, and
- * the recent activity feed at the bottom.
+ * the module status table on the left, the recent activity feed on the right,
+ * and the attention, invitations, and participants boxes in a full-width row
+ * below.
  */
 export function Overview() {
   const { roomId } = useParams({ from: '/session/app/rooms/$roomId' });
@@ -277,11 +278,67 @@ export function Overview() {
               ) : null}
             </Stack>
 
-            {/* Right column: Needs Your Attention sidebar. */}
+            {/* Right column: Recent Activity feed. */}
             <Stack gap="lg">
-              <AttentionSidebar dashboard={d} />
+              <Section title="Recent Activity">
+                {recentActivity.length === 0 ? (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="No activity recorded yet."
+                  />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
+                    {recentActivity.slice(0, 6).map((event) => (
+                      <div
+                        key={event.id}
+                        style={{
+                          display: 'flex',
+                          gap: space.sm,
+                          padding: `${space.xs}px ${space.sm}px`,
+                          borderRadius: radius.md,
+                          background: colors.bgWash,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            marginTop: 6,
+                            flexShrink: 0,
+                            background: event.actorSide === 'discloser' ? colors.brand : colors.info,
+                          }}
+                        />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <Typography.Text style={{ fontSize: 13 }}>
+                            <strong>{event.actorName ?? 'Someone'}</strong>{' '}
+                            {describeAction(event.action).label.toLowerCase()}{' '}
+                            <span style={{ color: colors.textTertiary }}>{describeTarget(event)}</span>
+                          </Typography.Text>
+                          <div style={{ fontSize: 12, color: colors.textTertiary }}>
+                            {relativeTime(event.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Section>
+            </Stack>
+          </div>
 
-              {d.invitations ? (
+          {/* Attention, invitations, participants — a full-width row below. */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: space.md,
+              alignItems: 'start',
+            }}
+          >
+            <AttentionSidebar dashboard={d} />
+
+            {d.invitations ? (
                 <Section title={`Pending Invitations · ${d.invitations.pendingCount}`}>
                   {d.invitations.items.length === 0 ? (
                     <Empty
@@ -360,54 +417,7 @@ export function Overview() {
                   )}
                 </Section>
               ) : null}
-            </Stack>
           </div>
-
-          {/* Recent Activity — full width at the bottom. */}
-          <Section title="Recent Activity">
-            {recentActivity.length === 0 ? (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="No activity recorded yet."
-              />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
-                {recentActivity.slice(0, 6).map((event) => (
-                  <div
-                    key={event.id}
-                    style={{
-                      display: 'flex',
-                      gap: space.sm,
-                      padding: `${space.xs}px ${space.sm}px`,
-                      borderRadius: radius.md,
-                      background: colors.bgWash,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        marginTop: 6,
-                        flexShrink: 0,
-                        background: event.actorSide === 'discloser' ? colors.brand : colors.info,
-                      }}
-                    />
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <Typography.Text style={{ fontSize: 13 }}>
-                        <strong>{event.actorName ?? 'Someone'}</strong>{' '}
-                        {describeAction(event.action).label.toLowerCase()}{' '}
-                        <span style={{ color: colors.textTertiary }}>{describeTarget(event)}</span>
-                      </Typography.Text>
-                      <div style={{ fontSize: 12, color: colors.textTertiary }}>
-                        {relativeTime(event.createdAt)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Section>
         </Stack>
       </PageBody>
     </>
@@ -450,10 +460,9 @@ function HeroStat({
           flexShrink: 0,
           background: icon === 'documents' ? colors.brandSubtle : colors.infoSubtle,
           color: icon === 'documents' ? colors.brand : colors.info,
-          fontSize: 22,
         }}
       >
-        {icon === 'documents' ? '📄' : '💬'}
+        {icon === 'documents' ? <FileIcon size={22} /> : <CommentIcon size={22} />}
       </div>
       <div style={{ minWidth: 0 }}>
         <div
@@ -577,7 +586,7 @@ function ModuleStatusTable({
             background: colors.bgSurface,
           }}
         >
-          {/* Module code badge. */}
+          {/* Module code badge — M1, M2, …, colored by completion like the status tag. */}
           <div
             style={{
               width: 36,
@@ -587,12 +596,12 @@ function ModuleStatusTable({
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 700,
-              fontSize: 13,
-              background: m.completed ? colors.brandSubtle : colors.bgWash,
-              color: m.completed ? colors.brand : colors.textTertiary,
+              fontSize: 12,
+              background: m.completed ? colors.successSubtle : colors.infoSubtle,
+              color: m.completed ? colors.success : colors.info,
             }}
           >
-            {m.code}
+            {/^\d+$/.test(m.code) ? `M${m.code}` : m.code}
           </div>
 
           <Typography.Text style={{ fontSize: 13 }} ellipsis>
@@ -647,21 +656,21 @@ function AttentionSidebar({ dashboard: d }: { dashboard: Dashboard }) {
     <Section title="Needs Your Attention">
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
         <AttentionRow
-          icon="💬"
+          icon={<CommentIcon size={18} />}
           count={openQuestions}
           label="open questions"
           note={isAdmin ? 'Awaiting response' : 'Started by me'}
           tone={openQuestions > 0 ? 'warning' : 'default'}
         />
         <AttentionRow
-          icon="📄"
+          icon={<FileIcon size={18} />}
           count={missingDocs}
           label="missing documents"
           note={isAdmin ? 'Never opened by recipient' : 'Never opened by anyone'}
           tone={missingDocs > 0 ? 'info' : 'default'}
         />
         <AttentionRow
-          icon="✅"
+          icon={<CheckCircleIcon size={18} />}
           count={awaitingReview}
           label="items need you"
           note="Mentions & unanswered"
@@ -710,7 +719,7 @@ function AttentionRow({
   note,
   tone,
 }: {
-  icon: string;
+  icon: React.ReactNode;
   count: number;
   label: string;
   note: string;
@@ -736,7 +745,7 @@ function AttentionRow({
         background: toneBg,
       }}
     >
-      <span style={{ fontSize: 18 }}>{icon}</span>
+      {icon}
       <div style={{ minWidth: 0, flex: 1 }}>
         <Typography.Text strong style={{ fontSize: 14, fontVariantNumeric: 'tabular-nums' }}>
           {count}{' '}

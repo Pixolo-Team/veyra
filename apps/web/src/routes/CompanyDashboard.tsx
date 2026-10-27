@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Breadcrumb, Empty, Progress, Skeleton, Tag, Typography } from 'antd';
 import { Link } from '@tanstack/react-router';
 import type { CompanyDashboard, CompanyDashboardRoom } from '@veyra/contracts';
-import { PlusIcon, useVeyraTokens } from '@veyra/design-system';
+import { CommentIcon, FolderIcon, PlusIcon, useVeyraTokens } from '@veyra/design-system';
 import { Button, Stack } from '@veyra/design-system';
 import { PageBody, PageHeader, RoomStatusTag } from '../components/Page';
 import { PlainLayout } from '../components/PlainLayout';
@@ -216,10 +216,9 @@ function HeroStat({
           flexShrink: 0,
           background: icon === 'dossier' ? colors.brandSubtle : colors.infoSubtle,
           color: icon === 'dossier' ? colors.brand : colors.info,
-          fontSize: 22,
         }}
       >
-        {icon === 'dossier' ? '📁' : '💬'}
+        {icon === 'dossier' ? <FolderIcon size={22} /> : <CommentIcon size={22} />}
       </div>
       <div style={{ minWidth: 0 }}>
         <div
