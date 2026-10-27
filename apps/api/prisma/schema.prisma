@@ -61,6 +61,7 @@ enum RoomStatus {
   active
   closed
   archived
+  deleted
 }
 
 enum CapabilityScope {

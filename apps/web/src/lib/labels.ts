@@ -12,6 +12,7 @@ export const ROOM_STATUS_LABELS: Record<RoomStatus, string> = {
   active: 'Active',
   closed: 'Closed',
   archived: 'Archived',
+  deleted: 'Deleted',
 };
 
 export const ROOM_STATUS_COLORS: Record<RoomStatus, string> = {
@@ -19,6 +20,7 @@ export const ROOM_STATUS_COLORS: Record<RoomStatus, string> = {
   active: 'green',
   closed: 'red',
   archived: 'default',
+  deleted: 'default',
 };
 
 export const ROLE_LABELS: Record<ParticipantRole, string> = {

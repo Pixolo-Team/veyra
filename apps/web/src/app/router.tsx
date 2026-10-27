@@ -19,6 +19,7 @@ import { SetPassword } from '../routes/SetPassword';
 import { AcceptInvite } from '../routes/AcceptInvite';
 import { RoomsIndex } from '../routes/RoomsIndex';
 import { CreateRoom } from '../routes/CreateRoom';
+import { CompanyDashboard } from '../routes/CompanyDashboard';
 import { RoomNda } from '../routes/RoomNda';
 import { Overview } from '../routes/Overview';
 import { Tree } from '../routes/Tree';
@@ -128,6 +129,13 @@ const createRoomRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/rooms/new',
   component: CreateRoom,
+});
+
+/** The company dashboard (Image 1) — the rollup across all of a company's rooms. */
+const companyDashboardRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/companies/$companyId/dashboard',
+  component: CompanyDashboard,
 });
 
 /** The NDA gate — outside the room chrome, because there is no room yet. */
@@ -244,6 +252,7 @@ const routeTree = rootRoute.addChildren([
       indexRoute,
       roomsIndexRoute,
       createRoomRoute,
+      companyDashboardRoute,
       roomNdaRoute,
       viewerRoute,
       roomRoute.addChildren([

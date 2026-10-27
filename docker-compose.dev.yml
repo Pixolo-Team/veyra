@@ -1,0 +1,22 @@
+# Local dev database (branch: local-dev-setup). Not used in production.
+#   docker compose -f docker-compose.dev.yml up -d
+services:
+  db:
+    image: postgres:16
+    container_name: veyra-dev-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: veyra
+    ports:
+      - "5433:5432"
+    volumes:
+      - veyra-dev-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d veyra"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  veyra-dev-db:

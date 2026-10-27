@@ -18,12 +18,14 @@ import type {
   CreateInvitationRequest,
   CreateRoomRequest,
   CreateThreadRequest,
+  CompanyDashboard,
   Dashboard,
   DocumentDetail,
   InvitationDto,
   InvitationPreview,
   ModuleSection,
   ModuleTree,
+  MyCompany,
   Overview,
   ParticipantGroup,
   RoomDetail,
@@ -76,6 +78,10 @@ export const invitationsApi = {
 export const companiesApi = {
   resolve: (query: { email?: string; q?: string }) =>
     api.get<CompanySuggestion[]>('/companies/resolve', { query }),
+  /** The companies this person can open a dashboard for. */
+  mine: () => api.get<MyCompany[]>('/companies/mine'),
+  dashboard: (companyId: string) =>
+    api.get<CompanyDashboard>(`/companies/${companyId}/dashboard`),
 };
 
 // ── Data room ───────────────────────────────────────────────────────────────

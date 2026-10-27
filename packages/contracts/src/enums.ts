@@ -16,7 +16,7 @@ export type ParticipantRole = z.infer<typeof participantRoleSchema>;
 export const participantStatusSchema = z.enum(['invited', 'active', 'revoked']);
 export type ParticipantStatus = z.infer<typeof participantStatusSchema>;
 
-export const roomStatusSchema = z.enum(['draft', 'active', 'closed', 'archived']);
+export const roomStatusSchema = z.enum(['draft', 'active', 'closed', 'archived', 'deleted']);
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
 
 export const invitationStatusSchema = z.enum(['pending', 'accepted', 'expired', 'revoked']);

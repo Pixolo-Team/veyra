@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useMatchRoute } from '@tanstack/react-router';
 import { useVeyraTokens } from '@veyra/design-system';
 import { Brand } from './Brand';
 import { HeaderActions } from './HeaderBar';
@@ -11,6 +11,28 @@ import { HeaderActions } from './HeaderBar';
  */
 export function PlainLayout({ children }: { children: ReactNode }) {
   const { colors, space } = useVeyraTokens();
+  const matchRoute = useMatchRoute();
+
+  const navLink = (to: string, label: string) => {
+    const active = Boolean(matchRoute({ to }));
+    return (
+      <Link
+        key={to}
+        to={to}
+        style={{
+          padding: `${space.xs}px ${space.sm}px`,
+          borderRadius: 8,
+          fontWeight: active ? 600 : 400,
+          fontSize: 14,
+          color: active ? colors.textPrimary : colors.textSecondary,
+          background: active ? colors.bgWash : 'transparent',
+          textDecoration: 'none',
+        }}
+      >
+        {label}
+      </Link>
+    );
+  };
 
   return (
     <div style={{ minHeight: '100dvh', background: colors.bgCanvas }}>
@@ -24,9 +46,14 @@ export function PlainLayout({ children }: { children: ReactNode }) {
           background: 'transparent',
         }}
       >
-        <Link to="/">
-          <Brand size={18} />
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.xl }}>
+          <Link to="/">
+            <Brand size={18} />
+          </Link>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: space.xs }}>
+            {navLink('/rooms', 'Rooms')}
+          </nav>
+        </div>
         {/* No sidebar out here, so the avatar carries sign-out. */}
         <HeaderActions withUserMenu />
       </header>

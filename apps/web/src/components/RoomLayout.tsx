@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { Tooltip } from 'antd';
-import { Link, Outlet, useMatchRoute, useParams } from '@tanstack/react-router';
+import { Link, Outlet, useMatchRoute, useParams, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Stack, useVeyraTokens } from '@veyra/design-system';
 import { Brand } from './Brand';
@@ -21,8 +21,11 @@ import { roomQuery } from '../lib/queries';
 import { rememberRoom } from '../lib/lastRoom';
 import { useSidebarMode, type SidebarMode } from '../lib/sidebarMode';
 import { useLogout } from '../app/session';
+import { api } from '../lib/api/client';
 
-/** Lucide draws on a 24px grid; 18px is the size that sits right next to 14px text. */
+
+/** Lucide draws on a 24px grid; 18px is the size that sits right next to 14px text. ]
+*/
 const ICON = 18;
 
 /*
@@ -35,8 +38,8 @@ const NAV = [
   { to: '/rooms/$roomId/dossier', label: 'Dossier', icon: <DossierIcon size={ICON} /> },
   { to: '/rooms/$roomId/documents', label: 'Documents', icon: <DocumentsIcon size={ICON} /> },
   { to: '/rooms/$roomId/groups', label: 'Groups', icon: <GroupsIcon size={ICON} /> },
-  { to: '/rooms/$roomId/activity', label: 'Activity', icon: <ActivityIcon size={ICON} /> },
-] as const;
+  { to: '/rooms/$roomId/activity', label: 'Activity', icon: <ActivityIcon size={ICON} /> }
+]
 
 /*
  * Settings is a destination like any other, but it belongs to the room's setup
@@ -51,7 +54,6 @@ const WIDTH: Record<SidebarMode, number> = { full: 244, compact: 76 };
 /** The gutter of ground around the page panel. */
 const INSET = 12;
 
-/** One row of the rail. `Link` and `button` differ enough to be worth sharing the skin. */
 function navRowStyle(args: {
   active: boolean;
   compact: boolean;
@@ -72,6 +74,36 @@ function navRowStyle(args: {
     color: active ? colors.sidebarTextActive : colors.sidebarText,
     background: active ? colors.sidebarActiveBg : 'transparent',
   };
+}
+
+/** One row of the rail. `Link` and `button` differ enough to be worth sharing the skin. */
+function row(args: {
+  to: string;
+  text: string;
+  icon: ReactNode;
+  onClick?: () => void;
+}) {
+  const active = Boolean(matchRoute({ to, params: { roomId } }));
+  const isDeleteRoute = args.to === '/rooms/$roomId/delete';
+  if (isDeleteRoute && args.onClick) {
+    // Don't render Link for delete; caller handles onClick
+    return args.onClick();
+  }
+  return withLabel(
+    args.text,
+    <Link
+      key={args.to}
+      to={args.to}
+      params={{ roomId }}
+      aria-current={active ? 'page' : undefined}
+      aria-label={compact ? args.text : undefined}
+      className="veyra-rail-row"
+      style={navRowStyle({ active, compact, colors, space })}
+    >
+      {args.icon}
+      {compact ? null : args.text}
+    </Link>,
+  );
 }
 
 /**
@@ -201,7 +233,7 @@ export function RoomLayout() {
         <RoomSwitcher room={room} compact={compact} />
 
         <Stack gap="xxs" style={{ flex: 1 }}>
-          {NAV.map((item) => row(item.to, item.label, item.icon))}
+          {NAV.map((item) => row(item.to, item.label, item.icon, item.to === '/rooms/$roomId/delete' ? () => handleDelete() : undefined))}
         </Stack>
 
         {/* Room admin and the way out. Pinned to the foot with a gap above —
