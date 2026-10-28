@@ -6,6 +6,7 @@ import { Button, Stack, useVeyraTokens } from '@veyra/design-system';
 import { PageBody, PageHeader, RoomStatusTag } from '../components/Page';
 import { PlusIcon } from '../components/icons';
 import { PlainLayout } from '../components/PlainLayout';
+import { request } from '../lib/api/client';
 import { messageOf } from '../lib/errorMessage';
 import { ROLE_SHORT } from '../lib/labels';
 import { companiesQuery, roomsQuery } from '../lib/queries';
@@ -21,38 +22,20 @@ export function RoomsIndex() {
   const companies = useQuery(companiesQuery);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
-const deleteMutation = useMutation({
-  mutationFn: async (roomId: string) => {
-    const res = await fetch(`/api/rooms/${roomId}/status`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ status: 'deleted' }),
-    });
+  const { message } = App.useApp();
 
-    if (!res.ok) {
-      throw new Error('Failed to delete room');
-    }
+  const deleteMutation = useMutation({
+    mutationFn: (roomId: string) =>
+      request(`/rooms/${roomId}/status`, { method: 'PATCH', body: { status: 'deleted' } }),
+    onSuccess: async (_data, roomId) => {
+      await queryClient.invalidateQueries({ queryKey: ['rooms'] });
+      await queryClient.invalidateQueries({ queryKey: ['room', roomId] });
+    },
+    // A refusal has a reason — "this room is active and cannot become deleted"
+    // is worth reading; a silent console line is not.
+    onError: (error) => message.error(messageOf(error, 'Could not delete this room.')),
+  });
 
-    return res;
-  },
-
-  onSuccess: async (_, roomId) => {
-    await queryClient.invalidateQueries({
-      queryKey: ['rooms'],
-    });
-
-    await queryClient.invalidateQueries({
-      queryKey: ['room', roomId],
-    });
-  },
-
-  onError: (error) => {
-    console.error('Room deletion failed:', error);
-  },
-})
   const primaryCompany = companies.data?.[0];
 
   return (

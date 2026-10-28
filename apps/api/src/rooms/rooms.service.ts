@@ -29,7 +29,9 @@ export class RoomsService {
   /** Rooms the user participates in — the switcher payload. */
   async listForUser(userId: string): Promise<RoomListItem[]> {
     const parts = await this.prisma.roomParticipant.findMany({
-      where: { userId, side: { in: ['discloser', 'recipient'] } },
+      // A deleted room is gone from the list — the row stays for the audit
+      // trail, but `listForUser` is the "rooms you work in" query.
+      where: { userId, side: { in: ['discloser', 'recipient'] }, room: { status: { not: 'deleted' } } },
       include: { room: true },
       orderBy: { room: { createdAt: 'desc' } },
     });

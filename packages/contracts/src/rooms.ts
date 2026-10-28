@@ -33,14 +33,16 @@ export type InviteParticipantRequest = z.infer<typeof inviteParticipantRequestSc
  * A room moves through draft → active → closed, and can be archived from any
  * of them. `archived` is a filing state, not a deletion: the room stays
  * readable and can be restored to `closed`.
- * Additionally, rooms in `archived` or `closed` status can be transitioned
- * to `deleted` to permanently remove them from the system.
+ * `deleted` is terminal and is reachable from `draft` (a room that never went
+ * to a counterparty is just discarded), `closed` and `archived`. An `active`
+ * room has to be closed or archived first, so deletion is always a deliberate
+ * two-step against a room someone may still be reading.
  */
 export const ROOM_STATUS_TRANSITIONS: Record<
   z.infer<typeof roomStatusSchema>,
   readonly z.infer<typeof roomStatusSchema>[]
 > = {
-  draft: ['active', 'archived'] as const,
+  draft: ['active', 'archived', 'deleted'] as const,
   active: ['closed', 'archived'] as const,
   closed: ['active', 'archived', 'deleted'] as const,
   archived: ['closed', 'deleted'] as const,
