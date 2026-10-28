@@ -7,11 +7,14 @@ import { ROOM_STATUS_COLORS, ROOM_STATUS_LABELS, type RoomStatus } from '../lib/
 export function PageHeader({
   title,
   subtitle,
+  crumbs,
   actions,
   tag,
 }: {
   title: string;
   subtitle?: ReactNode;
+  /** Trail above the title — “Rooms › Project Alpha”. */
+  crumbs?: ReactNode;
   actions?: ReactNode;
   tag?: ReactNode;
 }) {
@@ -26,13 +29,25 @@ export function PageHeader({
         // Tighter than the body's own inset: this band is two lines of type
         // over a rule, and at 24px it took as much height as the first rows
         // of the thing it names.
-        padding: `${space.md}px ${space['2xl']}px`,
+        padding: `${space.md}px 20px`,
         // Inside the page panel the title and the content share one white, so
         // the separation has to be drawn — there is no second ground to use.
         borderBottom: `1px solid ${colors.divider}`,
       }}
     >
       <div style={{ minWidth: 0 }}>
+        {crumbs ? (
+          <div
+            style={{
+              fontSize: 12,
+              lineHeight: 1.5,
+              color: colors.textTertiary,
+              marginBottom: 4,
+            }}
+          >
+            {crumbs}
+          </div>
+        ) : null}
         <div style={{ display: 'flex', alignItems: 'center', gap: space.sm }}>
           <Typography.Title level={4} style={{ margin: 0, lineHeight: 1.3 }}>
             {title}
@@ -40,7 +55,10 @@ export function PageHeader({
           {tag}
         </div>
         {subtitle ? (
-          <Typography.Text type="secondary" style={{ fontSize: 13, lineHeight: 1.4 }}>
+          <Typography.Text
+            type="secondary"
+            style={{ display: 'block', fontSize: 13, lineHeight: 1.4, marginTop: 4 }}
+          >
             {subtitle}
           </Typography.Text>
         ) : null}
@@ -58,9 +76,8 @@ export function PageBody({
   /** `'none'` lets the page use the panel's full width — for tables, mostly. */
   maxWidth?: number | 'none';
 }) {
-  const { space } = useVeyraTokens();
   return (
-    <div style={{ padding: space['2xl'] }}>
+    <div style={{ padding: 20 }}>
       <div style={{ maxWidth: maxWidth === 'none' ? undefined : maxWidth, margin: '0 auto' }}>
         {children}
       </div>
