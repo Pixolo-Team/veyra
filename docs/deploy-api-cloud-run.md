@@ -134,7 +134,7 @@ gcloud run deploy veyra-api \
   --service-account "veyra-api@$PROJECT.iam.gserviceaccount.com" \
   --add-volume=name=documents,type=cloud-storage,bucket="$PROJECT-veyra-documents" \
   --add-volume-mount=volume=documents,mount-path=/mnt/storage \
-  --set-env-vars=STORAGE_DRIVER=local,STORAGE_LOCAL_ROOT=/mnt/storage,CORS_ORIGIN=http://localhost:5173,WORKERS_ENABLED=true,MAILER_DRIVER=console,SESSION_COOKIE_NAME=veyra_session,SESSION_TTL_HOURS=12 \
+  --set-env-vars=STORAGE_DRIVER=local,STORAGE_LOCAL_ROOT=/mnt/storage,CORS_ORIGIN=https://veyra-web-seven.vercel.app,WORKERS_ENABLED=true,MAILER_DRIVER=console,SESSION_COOKIE_NAME=veyra_session,SESSION_TTL_HOURS=12 \
   --set-secrets=DATABASE_URL=VEYRA_DATABASE_URL:latest,DIRECT_URL=VEYRA_DIRECT_URL:latest,SESSION_SECRET=VEYRA_SESSION_SECRET:latest \
   --min-instances=1 \
   --max-instances=1 \
@@ -208,10 +208,16 @@ login is needed) — see `LocalStorageService.sign`:
   `mailer.service.ts` and needs finishing before real invitations go out.
 - `npm ci` reports 3 high-severity advisories; worth an `npm audit` pass before
   this handles real deal data.
-- `CORS_ORIGIN` is currently `http://localhost:5173`, a placeholder — the web
-  client is not deployed yet. Note that cross-origin browser auth will not work
-  against it regardless: the session cookie is `SameSite=Lax`, so it is dropped
-  on cross-site requests. The same-origin proxy in §5 is the supported path.
+- `CORS_ORIGIN` must be the deployed web origin — see §4. It is not what makes
+  browser auth work: cross-origin auth cannot work here regardless, because the
+  session cookie is `SameSite=Lax` and is dropped on cross-site requests. The
+  same-origin proxy in §5 is the supported path; this value only stops a
+  misconfigured direct call from being accepted.
+- **`git push` does not deploy the API.** There is no CI in this repository, so
+  pushing to `master` redeploys the web bundle on Vercel and leaves Cloud Run
+  serving the previous image. The two halves drift silently until someone
+  notices — which is exactly how a shipped feature sat broken in production for
+  six weeks. §4 is the only thing that ships an API change.
 - Cron timers are *configured* to fire (`--no-cpu-throttling`, `--min-instances=1`)
   but this has not been observed end-to-end — the workers log only on error or
   when draining real work, and the queue was empty. Confirm with a queued email.
