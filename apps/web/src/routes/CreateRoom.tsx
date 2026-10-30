@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { App, Form, Input, Select, Switch, Typography } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import type { CreateRoomRequest, ParticipantRole, RoomDetail } from '@veyra/contracts';
 import { Button, Stack, useVeyraTokens } from '@veyra/design-system';
 import { CompanyPicker } from '../components/CompanyPicker';
@@ -40,7 +40,10 @@ type DetailsValues = {
 
 function DetailsStep({ onCreated }: { onCreated: (room: RoomDetail) => void }) {
   const [form] = Form.useForm<DetailsValues>();
-  const [company, setCompany] = useState<CompanyChoice>({});
+  // Arriving from a company dashboard puts that company in the URL, so the
+  // dossier is filed against it without the user picking it a second time.
+  const { companyId, companyName } = useSearch({ strict: false }) as CompanyChoice;
+  const [company, setCompany] = useState<CompanyChoice>(companyId ? { companyId, companyName } : {});
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { space } = useVeyraTokens();

@@ -1,4 +1,4 @@
-import { useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Breadcrumb, Empty, Progress, Skeleton, Tag, Typography } from 'antd';
 import { Link } from '@tanstack/react-router';
@@ -57,7 +57,8 @@ export function CompanyDashboard() {
 
 function CompanyDashboardView({ data }: { data: CompanyDashboard }) {
   const { colors, radius, space } = useVeyraTokens();
-  const { summary, rooms, recentActivity, companyName } = data;
+  const navigate = useNavigate();
+  const { summary, rooms, recentActivity, companyName, companyId } = data;
   const roleLabel = data.viewer.role === 'admin' ? 'Admin' : data.viewer.role === 'contributor' ? 'Contributor' : 'Reviewer';
 
   // Breadcrumb items based on reference design
@@ -79,7 +80,10 @@ function CompanyDashboardView({ data }: { data: CompanyDashboard }) {
         subtitle={`Dashboard · ${roleLabel}`}
         tag={<RoomStatusTag status={rooms[0]?.status ?? 'active'} />}
         actions={
-          <Button icon={<PlusIcon />}>
+          <Button
+            icon={<PlusIcon />}
+            onClick={() => void navigate({ to: '/rooms/new', search: { companyId, companyName } })}
+          >
             New Dossier
           </Button>
         }

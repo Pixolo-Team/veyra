@@ -125,9 +125,17 @@ const roomsIndexRoute = createRoute({
   component: RoomsIndex,
 });
 
+/**
+ * `companyId`/`companyName` let the company dashboard start a room that is
+ * already filed against that company, instead of making the user re-pick it.
+ */
 const createRoomRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/rooms/new',
+  validateSearch: (search: Record<string, unknown>): { companyId?: string; companyName?: string } => ({
+    ...(typeof search.companyId === 'string' && search.companyId ? { companyId: search.companyId } : {}),
+    ...(typeof search.companyName === 'string' && search.companyName ? { companyName: search.companyName } : {}),
+  }),
   component: CreateRoom,
 });
 
